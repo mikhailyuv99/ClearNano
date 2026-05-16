@@ -1,12 +1,14 @@
 import "./hero-model-preload.js";
 import "./page-fade.js";
 import { initPageBgPin } from "./page-bg-pin.js";
-import { initHeroExperience } from "./hero-init.js";
 
 document.body.classList.add("is-page-ready");
 
 initPageBgPin();
-void initHeroExperience();
+
+import("./hero-init.js")
+  .then(({ initHeroExperience }) => initHeroExperience())
+  .catch((err) => console.error("[Clear Nano] Hero module failed:", err));
 
 const PRICE = 20000;
 const DAYS = 30;

@@ -19,7 +19,7 @@
     />
     <link rel="icon" type="image/png" href="/images/optimized/logo-p0-img0.webp" />
     <link rel="preload" href="/models/helmet.glb" as="fetch" crossorigin="anonymous" fetchpriority="high" />
-    <link rel="preload" href="/draco/draco_wasm_wrapper.js" as="script" />
+    <link rel="preload" href="/draco/gltf/draco_decoder.js" as="script" />
     <link rel="stylesheet" href="/src/styles.css" />
     <style>
       html,
@@ -44,7 +44,7 @@
       fetch("/models/helmet.glb", { cache: "force-cache", priority: "high" }).catch(function () {});
     </script>
   </head>
-  <body>
+  <body class="is-page-ready">
     <div class="page-bg-stack" aria-hidden="true">
       <div class="page-bg">
         <img

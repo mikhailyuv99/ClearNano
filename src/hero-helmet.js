@@ -11,7 +11,8 @@ import { isMobilePerfMode } from "./device.js";
 const FIRST_HERO_SLUG = "helmet";
 
 const sharedDraco = new DRACOLoader();
-sharedDraco.setDecoderPath("/draco/");
+sharedDraco.setDecoderPath("/draco/gltf/");
+sharedDraco.setDecoderConfig({ type: "js" });
 sharedDraco.preload();
 
 const TARGET_SIZE = 2.35;
@@ -680,10 +681,9 @@ export function initHeroHelmet(canvas, products = []) {
   /** One transition at a time — avoids torn fades and races. */
   let displayChain = Promise.resolve();
 
-  async function loadModelOnce(slug) {
-    const buf = await ensureModelBytes(slug);
+  function loadModelOnce(slug) {
     return new Promise((resolve, reject) => {
-      loader.parse(buf, modelUrl(slug), resolve, reject);
+      loader.load(modelUrl(slug), resolve, undefined, reject);
     });
   }
 
@@ -900,7 +900,6 @@ export function initHeroHelmet(canvas, products = []) {
   }
 
   resize();
-  startRenderLoop();
   const ro = new ResizeObserver(resize);
   ro.observe(container);
 
@@ -993,6 +992,7 @@ export function initHeroHelmet(canvas, products = []) {
     cancelAnimationFrame(raf);
   }
 
+  startRenderLoop();
   requestAnimationFrame(() => resize());
 
   const api = {
