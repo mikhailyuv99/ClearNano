@@ -5,16 +5,32 @@ export function initMobileMenu() {
   if (!toggle || !mobileNav) return () => {};
 
   const main = document.getElementById("main");
+  const root = document.documentElement;
   let open = false;
+  let scrollY = 0;
 
   function setOpen(next) {
     open = next;
     toggle.setAttribute("aria-expanded", open ? "true" : "false");
     mobileNav.classList.toggle("is-open", open);
+    root.classList.toggle("menu-open", open);
     document.body.classList.toggle("menu-open", open);
+
     if (open) {
+      scrollY = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      document.body.style.width = "100%";
       main?.setAttribute("inert", "");
     } else {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      window.scrollTo(0, scrollY);
       main?.removeAttribute("inert");
     }
   }

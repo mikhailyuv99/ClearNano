@@ -7,8 +7,12 @@ export function initSmoothScroll(onScroll) {
   const scheduleScroll = () => onScroll?.();
 
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || isMobilePerfMode()) {
-    window.addEventListener("scroll", scheduleScroll, { passive: true });
-    scheduleScroll();
+    const onNativeScroll = () => {
+      scheduleScroll();
+      window.dispatchEvent(new CustomEvent("app-scroll"));
+    };
+    window.addEventListener("scroll", onNativeScroll, { passive: true });
+    onNativeScroll();
     return { lenis: null, addTick: () => () => {} };
   }
 
