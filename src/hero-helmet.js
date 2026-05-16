@@ -5,6 +5,7 @@ import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { modelUrl } from "./hero-products.js";
+import { isMobilePerfMode } from "./device.js";
 
 const FIRST_HERO_SLUG = "helmet";
 
@@ -517,16 +518,18 @@ export function initHeroHelmet(canvas, products = []) {
   const camera = new THREE.PerspectiveCamera(36, 1, 0.05, 100);
   camera.position.set(0, 0.2, 5);
 
-  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+  const mobilePerf = isMobilePerfMode();
   const renderer = new THREE.WebGLRenderer({
     canvas,
     alpha: true,
-    antialias: !isMobile,
-    powerPreference: "high-performance",
+    antialias: true,
+    powerPreference: mobilePerf ? "default" : "high-performance",
     stencil: false,
     depth: true,
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.35 : 1.85));
+  renderer.setPixelRatio(
+    Math.min(window.devicePixelRatio || 1, mobilePerf ? 2 : 1.85)
+  );
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
@@ -534,6 +537,7 @@ export function initHeroHelmet(canvas, products = []) {
   const pmrem = new THREE.PMREMGenerator(renderer);
   const envScene = new RoomEnvironment();
   const envMap = pmrem.fromScene(envScene, 0.04).texture;
+  pmrem.dispose();
   scene.environment = envMap;
 
   scene.add(new THREE.HemisphereLight(0xdbeafe, 0x0f172a, 0.9));
@@ -569,13 +573,21 @@ export function initHeroHelmet(canvas, products = []) {
   const reduced = prefersReducedMotion();
   if (!reduced) {
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 1.2;
+    controls.autoRotateSpeed = mobilePerf ? 0.55 : 1.2;
   }
 
+  let isInteracting = false;
+
   canvas.addEventListener("pointerdown", () => {
+    isInteracting = true;
     controls.autoRotate = false;
   });
   canvas.addEventListener("pointerup", () => {
+    isInteracting = false;
+    if (!reduced) controls.autoRotate = true;
+  });
+  canvas.addEventListener("pointercancel", () => {
+    isInteracting = false;
     if (!reduced) controls.autoRotate = true;
   });
 
@@ -660,6 +672,7 @@ export function initHeroHelmet(canvas, products = []) {
   }
 
   function prefetchSlugs(slugs) {
+    if (mobilePerf) return;
     slugs.forEach((slug, i) => {
       window.setTimeout(() => {
         if (cache.has(slug)) return;
@@ -763,9 +776,9 @@ export function initHeroHelmet(canvas, products = []) {
 
   function resize() {
     const rect = container.getBoundingClientRect();
-    const mobile = window.innerWidth <= 959;
-    const width = Math.max(rect.width, mobile ? 260 : 320);
-    const height = Math.max(rect.height, mobile ? 220 : 400);
+    const width = Math.max(1, Math.floor(rect.width));
+    const height = Math.max(1, Math.floor(rect.height));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobilePerf ? 2 : 1.85));
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
@@ -778,6 +791,8 @@ export function initHeroHelmet(canvas, products = []) {
 
   const clock = new THREE.Clock();
   let heroVisible = true;
+  let lastFrameTime = 0;
+  const frameInterval = mobilePerf ? 1000 / 30 : 0;
 
   const visibilityIo = new IntersectionObserver(
     ([entry]) => {
@@ -787,15 +802,19 @@ export function initHeroHelmet(canvas, products = []) {
   );
   visibilityIo.observe(container);
 
-  function animate() {
+  function animate(now) {
     raf = requestAnimationFrame(animate);
     if (!heroVisible) return;
+    if (frameInterval && !isInteracting && now - lastFrameTime < frameInterval) return;
+    lastFrameTime = now;
     controls.update();
-    modelPivot.position.y = Math.sin(clock.getElapsedTime() * 1.05) * 0.03;
+    if (!mobilePerf) {
+      modelPivot.position.y = Math.sin(clock.getElapsedTime() * 1.05) * 0.03;
+    }
     renderer.render(scene, camera);
   }
 
-  animate();
+  animate(0);
 
   const api = {
     showProduct,

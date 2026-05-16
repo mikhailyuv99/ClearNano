@@ -49,9 +49,9 @@
   }
 
   .hero-helmet-scene canvas {
-    inset: -4% -4%;
-    width: calc(100% + 8%) !important;
-    height: calc(100% + 8%) !important;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
     filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.45));
   }
 
@@ -226,6 +226,34 @@
 
   .venue-row--right .venue-row__media {
     clip-path: polygon(0 0, 97% 0, 100% 100%, 3% 100%);
+  }
+}
+
+/* Mobile performance — drop expensive glass blur (major GPU saver on iOS) */
+@media (max-width: 768px) {
+  .hero-card__inner,
+  .site-header .header-shell,
+  .site-footer,
+  .mobile-nav,
+  .btn-glass,
+  .problem-card,
+  .problem-row,
+  .timeline-card,
+  .partnership-card,
+  .partnership-tier,
+  .calc-box,
+  .venue-row,
+  .paths-duo__col,
+  .plan-card,
+  .process-step__panel,
+  .gear-item,
+  .service-plan,
+  .commitment-stat,
+  .disinfect-item,
+  .bento-card,
+  .plan-stack article {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }
 

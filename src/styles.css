@@ -3,6 +3,11 @@
 @import "./refine.css";
 @import "./responsive.css";
 
+html {
+  color-scheme: dark;
+  background-color: #050810;
+}
+
 /* Clear Nano ù premium dark marketing site */
 :root {
   --bg: transparent;
@@ -708,11 +713,11 @@ h4 {
 
 .hero-helmet-scene canvas {
   position: absolute;
-  inset: -8% -6%;
+  inset: 0;
   z-index: 1;
   display: block;
-  width: calc(100% + 12%) !important;
-  height: calc(100% + 16%) !important;
+  width: 100% !important;
+  height: 100% !important;
   margin: auto;
   filter: drop-shadow(0 40px 64px rgba(0, 0, 0, 0.5));
   cursor: grab;

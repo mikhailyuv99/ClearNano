@@ -1,10 +1,14 @@
 import Lenis from "lenis";
 import "lenis/dist/lenis.css";
+import { isMobilePerfMode } from "./device.js";
 
 /** Premium smooth scroll — one rAF loop for Lenis + scroll-driven UI */
 export function initSmoothScroll(onScroll) {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    onScroll?.();
+  const scheduleScroll = () => onScroll?.();
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || isMobilePerfMode()) {
+    window.addEventListener("scroll", scheduleScroll, { passive: true });
+    scheduleScroll();
     return { lenis: null, addTick: () => () => {} };
   }
 
@@ -26,7 +30,7 @@ export function initSmoothScroll(onScroll) {
   });
 
   let scrollScheduled = false;
-  const scheduleScroll = () => {
+  const scheduleLenisScroll = () => {
     if (scrollScheduled) return;
     scrollScheduled = true;
     requestAnimationFrame(() => {
@@ -35,7 +39,7 @@ export function initSmoothScroll(onScroll) {
     });
   };
 
-  lenis.on("scroll", scheduleScroll);
+  lenis.on("scroll", scheduleLenisScroll);
 
   function raf(time) {
     lenis.raf(time);
@@ -55,7 +59,7 @@ export function initSmoothScroll(onScroll) {
     });
   });
 
-  scheduleScroll();
+  scheduleLenisScroll();
 
   return { lenis, addTick };
 }

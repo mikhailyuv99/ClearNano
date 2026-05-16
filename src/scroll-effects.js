@@ -1,5 +1,7 @@
 /** Scroll-driven effects — smooth reveals & process timeline */
 
+import { isMobilePerfMode } from "./device.js";
+
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
@@ -157,6 +159,32 @@ export function initReplayReveals(addTick) {
   if (reduced) {
     els.forEach((el) => finishReveal(el));
     return { refresh: () => {}, observe: () => {} };
+  }
+
+  if (isMobilePerfMode()) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const el = entry.target;
+          if (el.classList.contains("reveal--instant")) return;
+          if (entry.isIntersecting) finishReveal(el);
+          else resetReveal(el);
+        });
+      },
+      { threshold: 0.06, rootMargin: "0px 0px -4% 0px" }
+    );
+
+    els.forEach((el) => {
+      if (el.classList.contains("reveal--instant")) finishReveal(el);
+      else io.observe(el);
+    });
+
+    return {
+      refresh: () => {},
+      observe: (el) => {
+        if (el instanceof Element) io.observe(el);
+      },
+    };
   }
 
   const active = new Set();
@@ -376,6 +404,15 @@ function initProcessTimeline(addTick) {
     currentGlow = geom.lineLen;
     paintGlow();
     steps.forEach((s) => s.classList.add("is-active", "is-passed"));
+  } else if (isMobilePerfMode()) {
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!active) return;
+        sync();
+      },
+      { passive: true }
+    );
   } else if (addTick) {
     addTick(tick);
   }
