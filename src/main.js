@@ -1,5 +1,8 @@
 import "./page-fade.js";
+import { initPageBgPin } from "./page-bg-pin.js";
 import { initHeroExperience } from "./hero-init.js";
+
+initPageBgPin();
 
 const PRICE = 20000;
 const DAYS = 30;

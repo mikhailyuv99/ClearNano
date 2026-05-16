@@ -52,8 +52,23 @@ function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-/** Only one processed model in GPU memory on mobile (prevents iOS tab kills). */
-const MOBILE_CACHE_MAX = 1;
+/** Mobile: current + next in GPU; older models are evicted. */
+const MOBILE_CACHE_MAX = 2;
+const MOBILE_BYTES_CACHE_MAX = 3;
+
+function nextSlugInList(slug, list) {
+  const i = list.indexOf(slug);
+  if (i < 0) return list[0];
+  return list[(i + 1) % list.length];
+}
+
+function scheduleIdle(fn, timeout = 2200) {
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(fn, { timeout });
+  } else {
+    setTimeout(fn, 60);
+  }
+}
 
 function disposeObject3D(root) {
   if (!root) return;
@@ -670,11 +685,48 @@ export function initHeroHelmet(canvas, products = []) {
 
   attachMeshoptIfNeeded();
 
+  const slugs = [...new Set(products.map((p) => p.slug))];
+  const firstSlug = slugs[0] || "helmet";
+
   const cache = new Map();
   const inflight = new Map();
+  const bytesCache = new Map();
+  const bytesInflight = new Map();
   const availableSlugs = new Set();
   let currentModel = null;
-  let currentSlug = "helmet";
+  let currentSlug = firstSlug;
+
+  function trimBytesCache(keepSlugs) {
+    const keep = new Set(keepSlugs.filter(Boolean));
+    for (const key of [...bytesCache.keys()]) {
+      if (!keep.has(key)) bytesCache.delete(key);
+    }
+    while (bytesCache.size > MOBILE_BYTES_CACHE_MAX) {
+      const drop = [...bytesCache.keys()].find((k) => !keep.has(k));
+      if (!drop) break;
+      bytesCache.delete(drop);
+    }
+  }
+
+  async function ensureBytes(slug) {
+    if (bytesCache.has(slug)) return bytesCache.get(slug);
+    if (bytesInflight.has(slug)) return bytesInflight.get(slug);
+
+    const task = fetch(modelUrl(slug))
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.arrayBuffer();
+      })
+      .then((buf) => {
+        bytesCache.set(slug, buf);
+        trimBytesCache([slug, currentSlug, nextSlugInList(slug, slugs)]);
+        return buf;
+      })
+      .finally(() => bytesInflight.delete(slug));
+
+    bytesInflight.set(slug, task);
+    return task;
+  }
   let framed = false;
   let raf = 0;
   let contextLost = false;
@@ -683,6 +735,16 @@ export function initHeroHelmet(canvas, products = []) {
   let displayChain = Promise.resolve();
 
   function loadModelOnce(slug) {
+    const cachedBytes = bytesCache.get(slug);
+    if (cachedBytes) {
+      return attachMeshoptIfNeeded().then(
+        () =>
+          new Promise((resolve, reject) => {
+            loader.parse(cachedBytes, modelUrl(slug), resolve, reject);
+          })
+      );
+    }
+
     return new Promise((resolve, reject) => {
       loader.load(
         modelUrl(slug),
@@ -766,17 +828,32 @@ export function initHeroHelmet(canvas, products = []) {
     }
   }
 
-  function prefetchSlugs(slugs) {
-    slugs.forEach((slug, i) => {
+  function prefetchSlugs(targetSlugs) {
+    const list = [...new Set(targetSlugs.filter(Boolean))];
+    const limit = mobilePerf ? 2 : list.length;
+
+    list.slice(0, limit).forEach((slug, i) => {
       window.setTimeout(() => {
         if (mobilePerf) {
-          fetch(modelUrl(slug)).catch(() => {});
+          ensureBytes(slug)
+            .then(() => {
+              if (i !== 0 || cache.has(slug) || inflight.has(slug)) return;
+              scheduleIdle(() => {
+                if (!cache.has(slug)) loadModel(slug).catch(() => {});
+              });
+            })
+            .catch(() => {});
           return;
         }
         if (cache.has(slug)) return;
         loadModel(slug).catch(() => {});
-      }, mobilePerf ? 300 + i * 500 : 120 + i * 200);
+      }, mobilePerf ? 120 + i * 280 : 120 + i * 200);
     });
+  }
+
+  function prefetchAfterShow(slug) {
+    const next = nextSlugInList(slug, slugs);
+    prefetchSlugs([next]);
   }
 
   async function showProductCore(slug, options = {}) {
@@ -797,6 +874,7 @@ export function initHeroHelmet(canvas, products = []) {
       hideStageMessage(container);
       onModelReady?.();
       onWordReveal?.();
+      prefetchAfterShow(slug);
       return;
     }
 
@@ -816,6 +894,7 @@ export function initHeroHelmet(canvas, products = []) {
           onWordReveal?.();
           onModelReady?.();
           currentModel = next;
+          prefetchAfterShow(slug);
           resolve();
           return;
         }
@@ -835,7 +914,8 @@ export function initHeroHelmet(canvas, products = []) {
 
         setModelOpacity(next, 1);
         currentModel = next;
-        trimModelCache(cache, availableSlugs, [slug], mobilePerf);
+        trimModelCache(cache, availableSlugs, [slug, nextSlugInList(slug, slugs)], mobilePerf);
+        prefetchAfterShow(slug);
         resolve();
       });
     });
@@ -861,17 +941,17 @@ export function initHeroHelmet(canvas, products = []) {
     return p;
   }
 
-  const slugs = [...new Set(products.map((p) => p.slug))];
-  const firstSlug = slugs[0] || "helmet";
-
   hideStageMessage(container);
 
   const ready = loadModel(firstSlug)
     .then(() => showProduct(firstSlug))
     .then(() => {
       hideStageMessage(container);
-      const rest = slugs.filter((s) => s !== firstSlug);
-      prefetchSlugs(rest);
+      if (mobilePerf) {
+        prefetchSlugs([nextSlugInList(firstSlug, slugs)]);
+      } else {
+        prefetchSlugs(slugs.filter((s) => s !== firstSlug));
+      }
       return api;
     })
     .catch(() => {

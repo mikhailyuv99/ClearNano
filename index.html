@@ -33,17 +33,19 @@
     </style>
   </head>
   <body>
-    <div class="page-bg" aria-hidden="true">
-      <img
+    <div class="page-bg-stack" aria-hidden="true">
+      <div class="page-bg">
+        <img
         src="/images/bg-hero.jpg?v=2"
         alt=""
         width="2560"
         height="3840"
         decoding="async"
-        fetchpriority="high"
-      />
+          fetchpriority="high"
+        />
+      </div>
+      <div class="page-bg-overlay"></div>
     </div>
-    <div class="page-bg-overlay" aria-hidden="true"></div>
     <a class="skip-link" href="#main">Skip to content</a>
 
     <header class="site-header" data-header>

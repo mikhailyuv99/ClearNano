@@ -101,11 +101,29 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Blurred full-page background (user image) */
-.page-bg {
-  position: fixed;
-  inset: 0;
+/* Blurred full-page background ù sticky stack (fixed drifts on iOS Safari) */
+.page-bg-stack {
+  --page-bg-h: 100dvh;
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: var(--page-bg-h);
+  min-height: 100vh;
+  min-height: 100dvh;
+  min-height: 100svh;
   z-index: -2;
+  margin-bottom: calc(-1 * var(--page-bg-h));
+  overflow: hidden;
+  pointer-events: none;
+  isolation: isolate;
+  transform: translateZ(0);
+}
+
+.page-bg {
+  position: absolute;
+  inset: 0;
   overflow: hidden;
   pointer-events: none;
 }
@@ -123,9 +141,9 @@ html {
 }
 
 .page-bg-overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 1;
   pointer-events: none;
   /* Light veil ù keeps glass readable but shows the abstract art */
   background: linear-gradient(

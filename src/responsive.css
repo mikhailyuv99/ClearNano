@@ -1,5 +1,16 @@
 /* ─── Site-wide responsive fixes ─── */
 
+@media (max-width: 768px), (pointer: coarse) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
+}
+
 /* Hero: 3D above CTAs on mobile, tighter vertical rhythm */
 @media (max-width: 959px) {
   .hero-grid {
