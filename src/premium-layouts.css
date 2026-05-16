@@ -1,0 +1,394 @@
+/* TapCard-inspired layouts — Clear Nano */
+
+/* ─── Refined glass ─── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.045) !important;
+  border: 1px solid rgba(255, 255, 255, 0.11) !important;
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 20px 50px rgba(0, 0, 0, 0.28) !important;
+}
+
+/* ─── Section typography (TapCard rhythm) ─── */
+.section-title--split {
+  max-width: 16ch;
+  font-size: clamp(2.25rem, 5.5vw, 3.75rem);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.section-desc--wide {
+  max-width: 42ch;
+  font-size: 1.125rem;
+  line-height: 1.65;
+  color: var(--muted);
+  margin-top: 1.25rem;
+}
+
+/* ─── Problem — vertical stack like TapCard "The old way" ─── */
+.problem-tapcard {
+  padding: clamp(5rem, 12vw, 8rem) 0;
+}
+
+.problem-tapcard .section-head {
+  margin-bottom: clamp(2.5rem, 6vw, 4rem);
+  max-width: 720px;
+}
+
+.problem-stack {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  max-width: 820px;
+}
+
+.problem-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.5rem 2rem;
+  align-items: start;
+  padding: 1.65rem 1.75rem;
+  border-radius: 14px;
+  transition: border-color 0.35s var(--ease), transform 0.35s var(--ease);
+}
+
+.problem-row:hover {
+  border-color: rgba(45, 212, 191, 0.28) !important;
+  transform: translateY(-2px);
+}
+
+.problem-row__num {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  min-width: 2.5ch;
+}
+
+.problem-row__content h3 {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 2.5vw, 1.45rem);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.problem-row__content p {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: var(--muted);
+  max-width: 52ch;
+}
+
+/* ─── Gear — chip grid like TapCard tags ─── */
+.gear-chips {
+  list-style: none;
+  margin: 3rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: center;
+}
+
+.gear-chip {
+  padding: 0.85rem 1.25rem;
+  font-family: var(--font);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  border-radius: 10px;
+  transition: border-color 0.3s var(--ease), color 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+.gear-chip:hover {
+  color: var(--ink);
+  border-color: rgba(45, 212, 191, 0.35) !important;
+  transform: translateY(-2px);
+}
+
+/* ─── Timeline (How it works) ─── */
+.timeline-section {
+  padding: clamp(5rem, 12vw, 8rem) 0;
+}
+
+.timeline-rail {
+  position: relative;
+  max-width: 960px;
+  margin: clamp(2.5rem, 6vw, 4rem) auto 0;
+  padding: 0 1rem;
+}
+
+.timeline-rail__track {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.timeline-rail__track::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform-origin: top;
+  transform: scaleY(var(--timeline-progress, 0));
+  background: linear-gradient(180deg, #2dd4bf, #38bdf8);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.6);
+}
+
+.timeline-rail__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.timeline-step {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1.75rem;
+  align-items: center;
+  min-height: 180px;
+  padding: 2rem 0;
+}
+
+.timeline-node {
+  grid-column: 2;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(6, 10, 18, 0.9);
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  z-index: 2;
+  transition: border-color 0.4s, box-shadow 0.4s, transform 0.4s;
+}
+
+.timeline-step.is-active .timeline-node {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 5px rgba(56, 189, 248, 0.12), 0 0 20px rgba(56, 189, 248, 0.5);
+  transform: scale(1.2);
+}
+
+.timeline-card {
+  max-width: 360px;
+  padding: 1.5rem 1.65rem;
+  border-radius: 14px;
+}
+
+.timeline-step--left .timeline-card {
+  grid-column: 1;
+  justify-self: end;
+}
+
+.timeline-step--right .timeline-card {
+  grid-column: 3;
+  justify-self: start;
+}
+
+.timeline-card__num {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.75rem;
+  letter-spacing: -0.03em;
+  color: rgba(94, 234, 212, 0.85);
+  margin-bottom: 0.5rem;
+}
+
+.timeline-card h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1.15rem;
+}
+
+.timeline-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ─── Partnership — TapCard pricing tiers ─── */
+.partnership-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: clamp(2rem, 5vw, 3rem);
+}
+
+@media (min-width: 960px) {
+  .partnership-grid {
+    grid-template-columns: repeat(3, 1fr);
+    align-items: stretch;
+  }
+}
+
+.partnership-card {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.65rem;
+  border-radius: 14px;
+  min-height: 340px;
+}
+
+.partnership-card .tag {
+  display: inline-block;
+  padding: 0.35rem 0.65rem;
+  margin-bottom: 1rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--teal);
+  background: rgba(45, 212, 191, 0.1);
+  border: 1px solid rgba(45, 212, 191, 0.25);
+  border-radius: 6px;
+}
+
+.partnership-card h3 {
+  font-size: 1.5rem;
+  margin: 0 0 0.25rem;
+}
+
+.partnership-card__price {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 1.25rem;
+}
+
+.partnership-card__price::after {
+  content: none;
+}
+
+.partnership-card ul {
+  flex: 1;
+  margin: 0 0 1.5rem;
+  padding-left: 1rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.partnership-card.is-featured {
+  border-color: rgba(45, 212, 191, 0.35) !important;
+  background: rgba(45, 212, 191, 0.06) !important;
+}
+
+.partnership-card .btn {
+  width: 100%;
+  margin-top: auto;
+}
+
+/* Process serpentine */
+.timeline-rail--serpentine {
+  max-width: 640px;
+}
+
+.timeline-rail--serpentine .timeline-rail__track {
+  display: block;
+}
+
+.timeline-rail--serpentine::before,
+.timeline-rail--serpentine::after {
+  display: none;
+}
+
+.timeline-rail--serpentine .timeline-step {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+}
+
+.timeline-rail--serpentine .timeline-card {
+  max-width: 400px;
+}
+
+/* FAQ + footer */
+.contact-faq-section {
+  padding: clamp(5rem, 10vw, 7rem) 0;
+}
+
+.contact-faq-grid {
+  display: grid;
+  gap: 3rem;
+}
+
+@media (min-width: 1024px) {
+  .contact-faq-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+  }
+
+  .timeline-step {
+    grid-template-columns: 1fr auto 1fr;
+  }
+}
+
+.faq-accordion details {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.faq-accordion summary {
+  padding: 1.25rem 2rem 1.25rem 0;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.site-footer {
+  padding: 4rem 0 2rem !important;
+}
+
+@media (max-width: 768px) {
+  .problem-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .problem-row__num {
+    font-size: 1.75rem;
+  }
+
+  .timeline-step {
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    padding: 1.5rem 0;
+  }
+
+  .timeline-rail__track {
+    left: 5px;
+    transform: none;
+  }
+
+  .timeline-node {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .timeline-step--left .timeline-card,
+  .timeline-step--right .timeline-card {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: stretch;
+    max-width: none;
+  }
+}

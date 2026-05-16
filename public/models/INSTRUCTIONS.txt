@@ -1,0 +1,13 @@
+SKETCHFAB HELMET — HOW TO ADD
+
+1. On Sketchfab, open a helmet model you like (check license allows your use).
+2. Click Download → choose GLB (.glb) — smallest file, works best.
+3. Rename the file to:  helmet.glb
+4. Put it in this folder:  public/models/helmet.glb
+5. Refresh the website (Ctrl+Shift+R).
+
+Tips:
+- Motorcycle / full-face helmets look best for Clear Nano.
+- If the model uses Draco compression, it still works (we enable Draco).
+- If the helmet is tiny or huge, tell us — we can tweak scale in src/hero-helmet.js
+- Other names: edit MODEL_URL in src/hero-helmet.js
