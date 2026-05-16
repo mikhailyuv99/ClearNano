@@ -52,6 +52,47 @@ function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+const MOBILE_CACHE_MAX = 2;
+
+function disposeObject3D(root) {
+  if (!root) return;
+  root.traverse((child) => {
+    if (child.geometry) child.geometry.dispose();
+    if (!child.material) return;
+    const mats = Array.isArray(child.material) ? child.material : [child.material];
+    mats.forEach((mat) => {
+      if (!mat) return;
+      for (const key of Object.keys(mat)) {
+        const value = mat[key];
+        if (value?.isTexture) value.dispose();
+      }
+      mat.dispose();
+    });
+  });
+}
+
+function releaseCachedModel(slug, cache, availableSlugs) {
+  const model = cache.get(slug);
+  if (!model) return;
+  disposeObject3D(model);
+  cache.delete(slug);
+  availableSlugs.delete(slug);
+}
+
+function trimModelCache(cache, availableSlugs, keepSlugs, mobilePerf) {
+  if (!mobilePerf) return;
+  const keep = new Set(keepSlugs.filter(Boolean));
+  for (const slug of [...cache.keys()]) {
+    if (!keep.has(slug)) releaseCachedModel(slug, cache, availableSlugs);
+  }
+  if (cache.size <= MOBILE_CACHE_MAX) return;
+  for (const slug of [...cache.keys()]) {
+    if (keep.has(slug)) continue;
+    releaseCachedModel(slug, cache, availableSlugs);
+    if (cache.size <= MOBILE_CACHE_MAX) break;
+  }
+}
+
 function diffuseFromMaterial(mat) {
   const ext = mat?.userData?.gltfExtensions?.KHR_materials_pbrSpecularGlossiness;
   if (ext?.diffuseFactor) {
@@ -72,7 +113,16 @@ function isVisorMesh(name) {
   return n.includes("visor") || n.includes("glass") || n.includes("lens") || n.includes("shield");
 }
 
-function buildPhysicalMaterial({ color, metalness, roughness, envMap, envIntensity, clearcoat = 0 }) {
+function buildPhysicalMaterial({ color, metalness, roughness, envMap, envIntensity, clearcoat = 0, lite = false }) {
+  if (lite) {
+    return new THREE.MeshStandardMaterial({
+      color,
+      metalness,
+      roughness,
+      envMap,
+      envMapIntensity: envIntensity,
+    });
+  }
   return new THREE.MeshPhysicalMaterial({
     color,
     metalness,
@@ -85,12 +135,12 @@ function buildPhysicalMaterial({ color, metalness, roughness, envMap, envIntensi
 }
 
 /** Keep authored helmet look (custom PBR), not texture-driven. */
-function upgradeHelmetMaterials(object, envMap) {
+function upgradeHelmetMaterials(object, envMap, lite = false) {
   object.traverse((child) => {
     if (!child.isMesh) return;
 
-    child.castShadow = true;
-    child.receiveShadow = true;
+    child.castShadow = !lite;
+    child.receiveShadow = !lite;
 
     const meshName = child.name || "";
     const sourceMats = Array.isArray(child.material) ? child.material : [child.material];
@@ -103,6 +153,17 @@ function upgradeHelmetMaterials(object, envMap) {
       const dark = isDarkColor(diffuse) || matName.includes("blinn7");
 
       if (isVisorMesh(meshName) || matName.includes("visor")) {
+        if (lite) {
+          return new THREE.MeshStandardMaterial({
+            color: HELMET_COLORS.visor,
+            metalness: 0.15,
+            roughness: 0.2,
+            transparent: true,
+            opacity: 0.88,
+            envMap,
+            envMapIntensity: 1.2,
+          });
+        }
         return new THREE.MeshPhysicalMaterial({
           color: HELMET_COLORS.visor,
           metalness: 0.05,
@@ -124,6 +185,7 @@ function upgradeHelmetMaterials(object, envMap) {
           roughness: 0.42,
           envMap,
           envIntensity: 1.1,
+          lite,
         });
       }
 
@@ -137,8 +199,9 @@ function upgradeHelmetMaterials(object, envMap) {
         metalness: 0.42,
         roughness: 0.28,
         envMap,
-        envIntensity: 1.35,
-        clearcoat: 0.85,
+        envIntensity: lite ? 1.05 : 1.35,
+        clearcoat: lite ? 0 : 0.85,
+        lite,
       });
     });
 
@@ -268,12 +331,20 @@ function upgradeMaterialForEnv(mat, envMap) {
   return mat;
 }
 
-function applyMaterialsForSlug(root, slug, envMap) {
-  if (slug === "helmet") upgradeHelmetMaterials(root, envMap);
+function applyMaterialsForSlug(root, slug, envMap, lite = false) {
+  if (slug === "helmet") upgradeHelmetMaterials(root, envMap, lite);
   else {
     enhanceImportedMaterials(root, envMap);
     if (slug === "sports-shoes") tuneSportsShoesMaterials(root, envMap);
     if (slug === "masks") stylizeMaskBlack(root, envMap);
+    if (lite) {
+      root.traverse((child) => {
+        if (child.isMesh || child.isSkinnedMesh) {
+          child.castShadow = false;
+          child.receiveShadow = false;
+        }
+      });
+    }
   }
 }
 
@@ -527,68 +598,74 @@ export function initHeroHelmet(canvas, products = []) {
     stencil: false,
     depth: true,
   });
-  renderer.setPixelRatio(
-    Math.min(window.devicePixelRatio || 1, mobilePerf ? 2 : 1.85)
-  );
+  function getRendererDpr(interacting = false) {
+    const dpr = window.devicePixelRatio || 1;
+    if (!mobilePerf) return Math.min(dpr, 1.85);
+    return interacting ? Math.min(dpr, 1.65) : Math.min(dpr, 1.5);
+  }
+
+  renderer.setPixelRatio(getRendererDpr(false));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
 
   const pmrem = new THREE.PMREMGenerator(renderer);
   const envScene = new RoomEnvironment();
-  const envMap = pmrem.fromScene(envScene, 0.04).texture;
+  let envMap = pmrem.fromScene(envScene, 0.04).texture;
   pmrem.dispose();
   scene.environment = envMap;
 
-  scene.add(new THREE.HemisphereLight(0xdbeafe, 0x0f172a, 0.9));
-  scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+  scene.add(new THREE.HemisphereLight(0xdbeafe, 0x0f172a, mobilePerf ? 0.75 : 0.9));
+  scene.add(new THREE.AmbientLight(0xffffff, mobilePerf ? 0.35 : 0.25));
 
-  const key = new THREE.DirectionalLight(0xffffff, 2.2);
+  const key = new THREE.DirectionalLight(0xffffff, mobilePerf ? 1.65 : 2.2);
   key.position.set(6, 10, 7);
   scene.add(key);
 
-  const fill = new THREE.DirectionalLight(0x5eead4, 1.1);
+  const fill = new THREE.DirectionalLight(0x5eead4, mobilePerf ? 0.75 : 1.1);
   fill.position.set(-7, 3, 5);
   scene.add(fill);
 
-  const rim = new THREE.DirectionalLight(0x7dd3fc, 1.35);
-  rim.position.set(2, 5, -9);
-  scene.add(rim);
+  if (!mobilePerf) {
+    const rim = new THREE.DirectionalLight(0x7dd3fc, 1.35);
+    rim.position.set(2, 5, -9);
+    scene.add(rim);
 
-  const accent = new THREE.PointLight(0x2dd4bf, 2.5, 12);
-  accent.position.set(-2, 1, 3);
-  scene.add(accent);
+    const accent = new THREE.PointLight(0x2dd4bf, 2.5, 12);
+    accent.position.set(-2, 1, 3);
+    scene.add(accent);
+  }
 
   const modelPivot = new THREE.Group();
   scene.add(modelPivot);
 
   const controls = new OrbitControls(camera, canvas);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.06;
+  controls.enableDamping = !mobilePerf;
+  controls.dampingFactor = mobilePerf ? 0.08 : 0.06;
   controls.enablePan = false;
   controls.enableZoom = false;
   controls.minPolarAngle = Math.PI * 0.22;
   controls.maxPolarAngle = Math.PI * 0.78;
+  controls.rotateSpeed = mobilePerf ? 0.85 : 1;
 
   const reduced = prefersReducedMotion();
   if (!reduced) {
     controls.autoRotate = true;
-    controls.autoRotateSpeed = mobilePerf ? 0.55 : 1.2;
+    controls.autoRotateSpeed = mobilePerf ? 1.05 : 1.2;
   }
 
   let isInteracting = false;
 
-  canvas.addEventListener("pointerdown", () => {
+  controls.addEventListener("start", () => {
     isInteracting = true;
     controls.autoRotate = false;
+    renderer.setPixelRatio(getRendererDpr(true));
   });
-  canvas.addEventListener("pointerup", () => {
+  controls.addEventListener("end", () => {
     isInteracting = false;
     if (!reduced) controls.autoRotate = true;
-  });
-  canvas.addEventListener("pointercancel", () => {
-    isInteracting = false;
-    if (!reduced) controls.autoRotate = true;
+    renderer.setPixelRatio(getRendererDpr(false));
+    resize();
   });
 
   const loader = createLoader();
@@ -607,8 +684,10 @@ export function initHeroHelmet(canvas, products = []) {
   const inflight = new Map();
   const availableSlugs = new Set();
   let currentModel = null;
+  let currentSlug = "helmet";
   let framed = false;
   let raf = 0;
+  let contextLost = false;
 
   /** One transition at a time — avoids torn fades and races. */
   let displayChain = Promise.resolve();
@@ -627,11 +706,29 @@ export function initHeroHelmet(canvas, products = []) {
   async function processGltf(gltf, slug) {
     stripLikelyBackground(gltf.scene);
     const model = centerAndScale(gltf.scene.clone(true));
-    applyMaterialsForSlug(model, slug, envMap);
+    applyMaterialsForSlug(model, slug, envMap, mobilePerf);
     setModelOpacity(model, 1);
+    model.userData.slug = slug;
     cache.set(slug, model);
     availableSlugs.add(slug);
+    trimModelCache(cache, availableSlugs, [slug], mobilePerf);
     return model;
+  }
+
+  function detachModel(model) {
+    if (!model?.parent) return;
+    model.parent.remove(model);
+  }
+
+  function evictModel(model) {
+    if (!model) return;
+    const slug = model.userData.slug;
+    detachModel(model);
+    if (slug && cache.get(slug) === model) {
+      releaseCachedModel(slug, cache, availableSlugs);
+    } else {
+      disposeObject3D(model);
+    }
   }
 
   async function loadModel(slug) {
@@ -682,10 +779,14 @@ export function initHeroHelmet(canvas, products = []) {
   }
 
   async function showProductCore(slug, options = {}) {
+    if (contextLost) throw new Error("WebGL context lost");
+
     const { onTransitionStart, onWordReveal, onModelReady } = options;
     const next = await loadModel(slug);
 
     if (currentModel === next) return;
+
+    currentSlug = slug;
 
     if (!framed) {
       modelPivot.add(next);
@@ -699,16 +800,18 @@ export function initHeroHelmet(canvas, products = []) {
     }
 
     const prev = currentModel;
+    const useQuickSwap = reduced || mobilePerf;
 
     await new Promise((resolve) => {
       requestAnimationFrame(async () => {
         onTransitionStart?.();
 
-        if (reduced) {
-          if (prev?.parent) modelPivot.remove(prev);
+        if (useQuickSwap) {
+          if (prev) evictModel(prev);
           setModelOpacity(next, 1);
           modelPivot.add(next);
           frameCamera(camera, controls, next);
+          trimModelCache(cache, availableSlugs, [slug], mobilePerf);
           onWordReveal?.();
           onModelReady?.();
           currentModel = next;
@@ -721,7 +824,10 @@ export function initHeroHelmet(canvas, products = []) {
         onWordReveal?.();
         onModelReady?.();
 
-        if (prev?.parent) modelPivot.remove(prev);
+        if (prev) {
+          detachModel(prev);
+          if (mobilePerf) evictModel(prev);
+        }
 
         setModelOpacity(next, 0);
         modelPivot.add(next);
@@ -731,6 +837,7 @@ export function initHeroHelmet(canvas, products = []) {
 
         setModelOpacity(next, 1);
         currentModel = next;
+        trimModelCache(cache, availableSlugs, [slug], mobilePerf);
         resolve();
       });
     });
@@ -778,7 +885,7 @@ export function initHeroHelmet(canvas, products = []) {
     const rect = container.getBoundingClientRect();
     const width = Math.max(1, Math.floor(rect.width));
     const height = Math.max(1, Math.floor(rect.height));
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobilePerf ? 2 : 1.85));
+    renderer.setPixelRatio(getRendererDpr(isInteracting));
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
@@ -791,8 +898,44 @@ export function initHeroHelmet(canvas, products = []) {
 
   const clock = new THREE.Clock();
   let heroVisible = true;
-  let lastFrameTime = 0;
-  const frameInterval = mobilePerf ? 1000 / 30 : 0;
+  let lastRenderTime = 0;
+  const renderInterval = mobilePerf ? 1000 / 45 : 0;
+
+  async function recoverContext() {
+    contextLost = false;
+    for (const slug of [...cache.keys()]) releaseCachedModel(slug, cache, availableSlugs);
+    framed = false;
+    currentModel = null;
+    modelPivot.clear();
+
+    const nextPmrem = new THREE.PMREMGenerator(renderer);
+    const nextEnv = nextPmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    nextPmrem.dispose();
+    envMap = nextEnv;
+    scene.environment = envMap;
+
+    const slug = currentSlug || firstSlug;
+    await showProduct(slug);
+    if (!reduced) controls.autoRotate = true;
+  }
+
+  canvas.addEventListener(
+    "webglcontextlost",
+    (event) => {
+      event.preventDefault();
+      contextLost = true;
+      cancelAnimationFrame(raf);
+    },
+    false
+  );
+
+  canvas.addEventListener(
+    "webglcontextrestored",
+    () => {
+      recoverContext().then(() => animate(0));
+    },
+    false
+  );
 
   const visibilityIo = new IntersectionObserver(
     ([entry]) => {
@@ -804,10 +947,15 @@ export function initHeroHelmet(canvas, products = []) {
 
   function animate(now) {
     raf = requestAnimationFrame(animate);
-    if (!heroVisible) return;
-    if (frameInterval && !isInteracting && now - lastFrameTime < frameInterval) return;
-    lastFrameTime = now;
+    if (!heroVisible || contextLost) return;
+
     controls.update();
+
+    const shouldRender =
+      !renderInterval || isInteracting || now - lastRenderTime >= renderInterval;
+    if (!shouldRender) return;
+
+    lastRenderTime = now;
     if (!mobilePerf) {
       modelPivot.position.y = Math.sin(clock.getElapsedTime() * 1.05) * 0.03;
     }
@@ -819,6 +967,7 @@ export function initHeroHelmet(canvas, products = []) {
   const api = {
     showProduct,
     isAvailable: (slug) => availableSlugs.has(slug),
+    isHealthy: () => !contextLost,
     whenReady: () => ready,
   };
 

@@ -1,5 +1,8 @@
+import { isMobilePerfMode } from "./device.js";
+
 /** Milliseconds each hero product stays on screen before the next transition */
 export const HERO_ROTATE_MS = 3500;
+const MOBILE_ROTATE_MS = 4500;
 
 const WORD_IN_MS = 620;
 
@@ -84,9 +87,12 @@ export function initHeroRotator(api, products) {
   }
 
   const list = products;
+  const rotateMs = isMobilePerfMode() ? MOBILE_ROTATE_MS : HERO_ROTATE_MS;
   let index = 0;
 
   async function advance() {
+    if (api.isHealthy && !api.isHealthy()) return;
+
     let tries = 0;
     while (tries < list.length && !cancelled) {
       index = (index + 1) % list.length;
@@ -108,11 +114,11 @@ export function initHeroRotator(api, products) {
   }
 
   async function run() {
-    await new Promise((r) => setTimeout(r, HERO_ROTATE_MS));
+    await new Promise((r) => setTimeout(r, rotateMs));
     while (!cancelled) {
       await advance();
       if (cancelled) break;
-      await new Promise((r) => setTimeout(r, HERO_ROTATE_MS));
+      await new Promise((r) => setTimeout(r, rotateMs));
     }
   }
 
