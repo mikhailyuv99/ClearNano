@@ -322,6 +322,7 @@ h4 {
   margin: 0;
   padding: 0;
   height: var(--header-h);
+  overflow: visible;
   border-radius: 0;
   background: var(--glass-bg-solid);
   backdrop-filter: var(--glass-blur);
@@ -353,6 +354,8 @@ h4 {
 }
 
 .header-shell {
+  position: relative;
+  z-index: 2;
   height: 100%;
   transition: background 0.35s, box-shadow 0.35s, border 0.35s;
 }
@@ -441,7 +444,7 @@ h4 {
   cursor: pointer;
   flex-shrink: 0;
   position: relative;
-  z-index: 220;
+  z-index: 3;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -479,7 +482,7 @@ h4 {
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 190;
+  z-index: 1;
   flex-direction: column;
   gap: 0.4rem;
   padding: 1rem 1.25rem 1.5rem;

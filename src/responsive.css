@@ -122,15 +122,30 @@
     pointer-events: auto;
   }
 
-  .header-shell,
-  .header-inner {
+  .header-shell {
     position: relative;
     z-index: 2;
     pointer-events: auto;
   }
 
+  .header-inner {
+    position: relative;
+    z-index: 1;
+    pointer-events: auto;
+  }
+
+  .menu-toggle {
+    position: relative;
+    z-index: 3;
+  }
+
   body.menu-open .site-header .header-shell {
+    z-index: 3;
     border-bottom-color: transparent;
+  }
+
+  body.menu-open .mobile-nav {
+    z-index: 1;
   }
 }
 
