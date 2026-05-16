@@ -115,7 +115,7 @@
   }
 
   .site-header {
-    z-index: 200;
+    z-index: 10000;
     padding-top: env(safe-area-inset-top, 0px);
     height: var(--header-h);
     box-sizing: border-box;
