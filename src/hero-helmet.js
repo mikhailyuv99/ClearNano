@@ -686,15 +686,14 @@ export function initHeroHelmet(canvas, products = []) {
   /** One transition at a time — avoids torn fades and races. */
   let displayChain = Promise.resolve();
 
-  function loadModelOnce(slug) {
+  async function loadModelOnce(slug) {
+    const buf = await ensureModelBytes(slug);
     return new Promise((resolve, reject) => {
-      loader.load(modelUrl(slug), resolve, undefined, (err) => {
-        reject(err || new Error(`GLTF load failed: ${slug}`));
-      });
+      loader.parse(buf, modelUrl(slug), resolve, reject);
     });
   }
 
-  async function processGltf(gltf, slug) {
+  async function processGltf(gltf, fileSlug, displaySlug = fileSlug) {
     if (!envMap) {
       try {
         envMap = await envMapReady;
@@ -706,12 +705,12 @@ export function initHeroHelmet(canvas, products = []) {
 
     stripLikelyBackground(gltf.scene);
     const model = centerAndScale(gltf.scene.clone(true));
-    applyMaterialsForSlug(model, slug, envMap, slug !== "helmet");
+    applyMaterialsForSlug(model, displaySlug, envMap, displaySlug !== "helmet");
     setModelOpacity(model, 1);
-    model.userData.slug = slug;
+    model.userData.slug = displaySlug;
 
-    cache.set(slug, model);
-    availableSlugs.add(slug);
+    cache.set(displaySlug, model);
+    availableSlugs.add(displaySlug);
     return model;
   }
 
@@ -754,7 +753,7 @@ export function initHeroHelmet(canvas, products = []) {
           try {
             if (attempt > 0) await new Promise((r) => setTimeout(r, 400 * attempt));
             const gltf = await loadModelOnce(trySlug);
-            return await processGltf(gltf, trySlug);
+            return await processGltf(gltf, trySlug, slug);
           } catch (e) {
             lastErr = e;
           }
@@ -888,7 +887,7 @@ export function initHeroHelmet(canvas, products = []) {
     return p;
   }
 
-  const ready = loadModel(firstSlug)
+  const ready = Promise.all([envMapReady, loadModel(firstSlug)])
     .then(() => showProduct(firstSlug))
     .then(() => {
       hideStageMessage(container);
@@ -967,7 +966,7 @@ export function initHeroHelmet(canvas, products = []) {
     ([entry]) => {
       heroVisible = entry.isIntersecting;
     },
-    { threshold: 0.05, rootMargin: "40px" }
+    { threshold: 0, rootMargin: "120px 0px" }
   );
   visibilityIo.observe(container);
 

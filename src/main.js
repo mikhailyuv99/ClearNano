@@ -1,4 +1,4 @@
-import "./hero-model-preload.js";
+import "./hero-boot.js";
 import "./page-fade.js";
 import { initPageBgPin } from "./page-bg-pin.js";
 
