@@ -98,6 +98,8 @@ html {
 }
 
 html {
+  margin: 0;
+  padding: 0;
   scroll-behavior: smooth;
 }
 
@@ -323,6 +325,9 @@ h4 {
   right: 0;
   z-index: 200;
   height: var(--header-h);
+  margin: 0;
+  padding: 0;
+  background: #050810;
 }
 
 .site-header.is-scrolled .header-shell,
@@ -503,7 +508,8 @@ h4 {
 /* Hero */
 .hero {
   position: relative;
-  padding: calc(var(--header-h) + 0.65rem) 0 0;
+  padding: var(--header-h) 0 0;
+  margin: 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -767,10 +773,22 @@ h4 {
   z-index: 2;
 }
 
+.hero-helmet-status--loading {
+  color: var(--ink-soft);
+}
+
 .hero-helmet-status--error {
   color: var(--ink-soft);
   max-width: 16rem;
   line-height: 1.5;
+}
+
+.hero-helmet-scene.is-loading .hero-helmet-hint {
+  opacity: 0;
+}
+
+.hero-helmet-scene.is-loading .hero-helmet-status--loading {
+  display: flex;
 }
 
 .hero-helmet-hint {

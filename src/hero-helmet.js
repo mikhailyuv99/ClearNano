@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
-import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { modelUrl } from "./hero-products.js";
@@ -14,21 +13,6 @@ const FIRST_HERO_SLUG = "helmet";
 const sharedDraco = new DRACOLoader();
 sharedDraco.setDecoderPath("/draco/");
 sharedDraco.preload();
-
-const meshoptReady = MeshoptDecoder.ready;
-
-/** Network load via GLTFLoader (parse-from-bytes breaks Draco/meshopt assets). */
-function preloadHelmetGltf() {
-  return meshoptReady.then(() => {
-    const loader = createLoader();
-    loader.setMeshoptDecoder(MeshoptDecoder);
-    return new Promise((resolve, reject) => {
-      loader.load(modelUrl(FIRST_HERO_SLUG), resolve, undefined, reject);
-    });
-  });
-}
-
-const helmetGltfPreload = preloadHelmetGltf();
 
 const TARGET_SIZE = 2.35;
 /** Keep in sync with --hero-word-fade-out / --hero-word-fade-in in styles.css */
@@ -659,16 +643,6 @@ export function initHeroHelmet(canvas, products = []) {
   });
 
   const loader = createLoader();
-  let meshoptAttached = false;
-
-  async function attachMeshoptIfNeeded() {
-    if (meshoptAttached) return;
-    await meshoptReady;
-    loader.setMeshoptDecoder(MeshoptDecoder);
-    meshoptAttached = true;
-  }
-
-  attachMeshoptIfNeeded();
 
   const slugs = [...new Set(products.map((p) => p.slug))];
   const firstSlug = slugs[0] || "helmet";
@@ -706,8 +680,7 @@ export function initHeroHelmet(canvas, products = []) {
   /** One transition at a time — avoids torn fades and races. */
   let displayChain = Promise.resolve();
 
-  async function loadModelOnce(slug) {
-    await attachMeshoptIfNeeded();
+  function loadModelOnce(slug) {
     return new Promise((resolve, reject) => {
       loader.load(modelUrl(slug), resolve, undefined, reject);
     });
@@ -762,20 +735,10 @@ export function initHeroHelmet(canvas, products = []) {
     const task = (async () => {
       trimGpuCache(cache, availableSlugs, [slug, nextSlugInList(slug, slugs), currentSlug]);
 
-      if (slug === FIRST_HERO_SLUG) {
-        try {
-          const gltf = await helmetGltfPreload;
-          return await processGltf(gltf, slug);
-        } catch {
-          /* fall through to standard loader + retries */
-        }
-      }
-
       let lastErr;
       for (let attempt = 0; attempt <= LOAD_RETRIES; attempt++) {
         try {
-          await attachMeshoptIfNeeded();
-          if (attempt > 0) await new Promise((r) => setTimeout(r, 280 * attempt));
+          if (attempt > 0) await new Promise((r) => setTimeout(r, 400 * attempt));
           const gltf = await loadModelOnce(slug);
           return await processGltf(gltf, slug);
         } catch (e) {
@@ -910,7 +873,7 @@ export function initHeroHelmet(canvas, products = []) {
     return p;
   }
 
-  hideStageMessage(container);
+  setStageMessage(container, "loading", "Loading 3D model…");
 
   const ready = loadModel(firstSlug)
     .then(() => showProduct(firstSlug))
