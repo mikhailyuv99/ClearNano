@@ -20,9 +20,9 @@ function frameCamera(camera, controls, object) {
   const center = box.getCenter(new THREE.Vector3());
   const maxDim = Math.max(size.x, size.y, size.z, 0.001);
   const fovRad = (camera.fov * Math.PI) / 180;
-  const pad = window.innerWidth <= 959 ? 2.05 : 1.65;
+  const pad = window.innerWidth <= 959 ? 2.1 : 1.75;
   const distance = (maxDim / 2 / Math.tan(fovRad / 2)) * pad;
-  camera.position.set(center.x + distance * 0.35, center.y + size.y * 0.02, center.z + distance * 0.85);
+  camera.position.set(center.x + distance * 0.55, center.y + size.y * 0.04, center.z + distance * 0.72);
   camera.near = 0.05;
   camera.far = 200;
   camera.updateProjectionMatrix();
@@ -75,18 +75,16 @@ export function initHeroScene(canvas) {
   controls.enableZoom = false;
   controls.minPolarAngle = Math.PI * 0.18;
   controls.maxPolarAngle = Math.PI * 0.82;
-  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.9;
-  }
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const spinSpeed = reducedMotion ? 0 : 1.25;
+
   controls.addEventListener("start", () => {
-    controls.autoRotate = false;
+    machine.userData.userSpinning = false;
   });
   controls.addEventListener("end", () => {
-    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      controls.autoRotate = true;
-    }
+    machine.userData.userSpinning = true;
   });
+  machine.userData.userSpinning = true;
 
   function resize() {
     const parent = canvas.parentElement;
@@ -109,7 +107,9 @@ export function initHeroScene(canvas) {
   function tick() {
     raf = requestAnimationFrame(tick);
     controls.update();
-    machine.rotation.y = 0.22 + Math.sin(clock.getElapsedTime() * 0.55) * 0.08;
+    if (spinSpeed > 0 && machine.userData.userSpinning !== false) {
+      machine.rotation.y += clock.getDelta() * spinSpeed;
+    }
     renderer.render(scene, camera);
   }
   tick();
