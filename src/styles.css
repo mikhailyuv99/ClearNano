@@ -729,16 +729,6 @@ h4 {
   cursor: grabbing;
 }
 
-.hero-model-viewer {
-  display: none;
-}
-
-@media (min-width: 769px) and (pointer: fine) {
-  .hero-model-viewer {
-    display: none !important;
-  }
-}
-
 .hero-helmet-status {
   position: absolute;
   inset: 0;

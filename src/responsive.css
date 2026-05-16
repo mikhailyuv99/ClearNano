@@ -1,29 +1,5 @@
 /* ─── Site-wide responsive fixes ─── */
 
-/* Hero 3D — model-viewer on touch / narrow screens (Three.js on desktop only) */
-@media (max-width: 768px), (pointer: coarse) {
-  .hero-helmet-scene canvas {
-    display: none !important;
-  }
-
-  .hero-model-viewer {
-    display: block !important;
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    background: transparent;
-    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.45));
-    transition: opacity 0.35s ease;
-    touch-action: none;
-  }
-
-  .hero-model-viewer.is-swapping {
-    opacity: 0.35;
-  }
-}
-
 /* Hero: 3D above CTAs on mobile, tighter vertical rhythm */
 @media (max-width: 959px) {
   .hero-grid {

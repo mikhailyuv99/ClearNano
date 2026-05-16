@@ -52,7 +52,8 @@ function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-const MOBILE_CACHE_MAX = 2;
+/** Only one processed model in GPU memory on mobile (prevents iOS tab kills). */
+const MOBILE_CACHE_MAX = 1;
 
 function disposeObject3D(root) {
   if (!root) return;
@@ -594,14 +595,13 @@ export function initHeroHelmet(canvas, products = []) {
     canvas,
     alpha: true,
     antialias: true,
-    powerPreference: mobilePerf ? "default" : "high-performance",
+    powerPreference: "high-performance",
     stencil: false,
     depth: true,
   });
-  function getRendererDpr(interacting = false) {
+  function getRendererDpr() {
     const dpr = window.devicePixelRatio || 1;
-    if (!mobilePerf) return Math.min(dpr, 1.85);
-    return interacting ? Math.min(dpr, 1.65) : Math.min(dpr, 1.5);
+    return Math.min(dpr, mobilePerf ? 2 : 1.85);
   }
 
   renderer.setPixelRatio(getRendererDpr(false));
@@ -615,57 +615,47 @@ export function initHeroHelmet(canvas, products = []) {
   pmrem.dispose();
   scene.environment = envMap;
 
-  scene.add(new THREE.HemisphereLight(0xdbeafe, 0x0f172a, mobilePerf ? 0.75 : 0.9));
-  scene.add(new THREE.AmbientLight(0xffffff, mobilePerf ? 0.35 : 0.25));
+  scene.add(new THREE.HemisphereLight(0xdbeafe, 0x0f172a, 0.9));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.25));
 
-  const key = new THREE.DirectionalLight(0xffffff, mobilePerf ? 1.65 : 2.2);
+  const key = new THREE.DirectionalLight(0xffffff, 2.2);
   key.position.set(6, 10, 7);
   scene.add(key);
 
-  const fill = new THREE.DirectionalLight(0x5eead4, mobilePerf ? 0.75 : 1.1);
+  const fill = new THREE.DirectionalLight(0x5eead4, 1.1);
   fill.position.set(-7, 3, 5);
   scene.add(fill);
 
-  if (!mobilePerf) {
-    const rim = new THREE.DirectionalLight(0x7dd3fc, 1.35);
-    rim.position.set(2, 5, -9);
-    scene.add(rim);
+  const rim = new THREE.DirectionalLight(0x7dd3fc, 1.35);
+  rim.position.set(2, 5, -9);
+  scene.add(rim);
 
-    const accent = new THREE.PointLight(0x2dd4bf, 2.5, 12);
-    accent.position.set(-2, 1, 3);
-    scene.add(accent);
-  }
+  const accent = new THREE.PointLight(0x2dd4bf, 2.5, 12);
+  accent.position.set(-2, 1, 3);
+  scene.add(accent);
 
   const modelPivot = new THREE.Group();
   scene.add(modelPivot);
 
   const controls = new OrbitControls(camera, canvas);
-  controls.enableDamping = !mobilePerf;
-  controls.dampingFactor = mobilePerf ? 0.08 : 0.06;
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.06;
   controls.enablePan = false;
   controls.enableZoom = false;
   controls.minPolarAngle = Math.PI * 0.22;
   controls.maxPolarAngle = Math.PI * 0.78;
-  controls.rotateSpeed = mobilePerf ? 0.85 : 1;
 
   const reduced = prefersReducedMotion();
   if (!reduced) {
     controls.autoRotate = true;
-    controls.autoRotateSpeed = mobilePerf ? 1.05 : 1.2;
+    controls.autoRotateSpeed = 1.2;
   }
 
-  let isInteracting = false;
-
   controls.addEventListener("start", () => {
-    isInteracting = true;
     controls.autoRotate = false;
-    renderer.setPixelRatio(getRendererDpr(true));
   });
   controls.addEventListener("end", () => {
-    isInteracting = false;
     if (!reduced) controls.autoRotate = true;
-    renderer.setPixelRatio(getRendererDpr(false));
-    resize();
   });
 
   const loader = createLoader();
@@ -706,9 +696,16 @@ export function initHeroHelmet(canvas, products = []) {
   async function processGltf(gltf, slug) {
     stripLikelyBackground(gltf.scene);
     const model = centerAndScale(gltf.scene.clone(true));
-    applyMaterialsForSlug(model, slug, envMap, mobilePerf);
+    applyMaterialsForSlug(model, slug, envMap, false);
     setModelOpacity(model, 1);
     model.userData.slug = slug;
+
+    if (mobilePerf) {
+      for (const cachedSlug of [...cache.keys()]) {
+        if (cachedSlug !== slug) releaseCachedModel(cachedSlug, cache, availableSlugs);
+      }
+    }
+
     cache.set(slug, model);
     availableSlugs.add(slug);
     trimModelCache(cache, availableSlugs, [slug], mobilePerf);
@@ -732,7 +729,8 @@ export function initHeroHelmet(canvas, products = []) {
   }
 
   async function loadModel(slug) {
-    if (cache.has(slug)) return cache.get(slug);
+    if (mobilePerf && currentModel && currentSlug === slug) return currentModel;
+    if (!mobilePerf && cache.has(slug)) return cache.get(slug);
     if (inflight.has(slug)) return inflight.get(slug);
 
     const task = (async () => {
@@ -769,12 +767,15 @@ export function initHeroHelmet(canvas, products = []) {
   }
 
   function prefetchSlugs(slugs) {
-    if (mobilePerf) return;
     slugs.forEach((slug, i) => {
       window.setTimeout(() => {
+        if (mobilePerf) {
+          fetch(modelUrl(slug)).catch(() => {});
+          return;
+        }
         if (cache.has(slug)) return;
         loadModel(slug).catch(() => {});
-      }, 120 + i * 200);
+      }, mobilePerf ? 300 + i * 500 : 120 + i * 200);
     });
   }
 
@@ -800,18 +801,18 @@ export function initHeroHelmet(canvas, products = []) {
     }
 
     const prev = currentModel;
-    const useQuickSwap = reduced || mobilePerf;
+    const fadeOutMs = mobilePerf ? 520 : FADE_OUT_MS;
+    const fadeInMs = mobilePerf ? 620 : FADE_IN_MS;
 
     await new Promise((resolve) => {
       requestAnimationFrame(async () => {
         onTransitionStart?.();
 
-        if (useQuickSwap) {
+        if (reduced) {
           if (prev) evictModel(prev);
           setModelOpacity(next, 1);
           modelPivot.add(next);
           frameCamera(camera, controls, next);
-          trimModelCache(cache, availableSlugs, [slug], mobilePerf);
           onWordReveal?.();
           onModelReady?.();
           currentModel = next;
@@ -819,21 +820,18 @@ export function initHeroHelmet(canvas, products = []) {
           return;
         }
 
-        if (prev) await animateModelOpacity(prev, 1, 0, FADE_OUT_MS);
+        if (prev) await animateModelOpacity(prev, 1, 0, fadeOutMs);
 
         onWordReveal?.();
         onModelReady?.();
 
-        if (prev) {
-          detachModel(prev);
-          if (mobilePerf) evictModel(prev);
-        }
+        if (prev) evictModel(prev);
 
         setModelOpacity(next, 0);
         modelPivot.add(next);
         frameCamera(camera, controls, next);
 
-        await animateModelOpacity(next, 0, 1, FADE_IN_MS);
+        await animateModelOpacity(next, 0, 1, fadeInMs);
 
         setModelOpacity(next, 1);
         currentModel = next;
@@ -885,7 +883,7 @@ export function initHeroHelmet(canvas, products = []) {
     const rect = container.getBoundingClientRect();
     const width = Math.max(1, Math.floor(rect.width));
     const height = Math.max(1, Math.floor(rect.height));
-    renderer.setPixelRatio(getRendererDpr(isInteracting));
+    renderer.setPixelRatio(getRendererDpr());
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
@@ -898,8 +896,7 @@ export function initHeroHelmet(canvas, products = []) {
 
   const clock = new THREE.Clock();
   let heroVisible = true;
-  let lastRenderTime = 0;
-  const renderInterval = mobilePerf ? 1000 / 45 : 0;
+  let pageVisible = typeof document === "undefined" || document.visibilityState !== "hidden";
 
   async function recoverContext() {
     contextLost = false;
@@ -932,7 +929,7 @@ export function initHeroHelmet(canvas, products = []) {
   canvas.addEventListener(
     "webglcontextrestored",
     () => {
-      recoverContext().then(() => animate(0));
+      recoverContext().then(() => animate());
     },
     false
   );
@@ -945,24 +942,20 @@ export function initHeroHelmet(canvas, products = []) {
   );
   visibilityIo.observe(container);
 
-  function animate(now) {
+  document.addEventListener("visibilitychange", () => {
+    pageVisible = document.visibilityState !== "hidden";
+  });
+
+  function animate() {
     raf = requestAnimationFrame(animate);
-    if (!heroVisible || contextLost) return;
+    if (!heroVisible || !pageVisible || contextLost) return;
 
     controls.update();
-
-    const shouldRender =
-      !renderInterval || isInteracting || now - lastRenderTime >= renderInterval;
-    if (!shouldRender) return;
-
-    lastRenderTime = now;
-    if (!mobilePerf) {
-      modelPivot.position.y = Math.sin(clock.getElapsedTime() * 1.05) * 0.03;
-    }
+    modelPivot.position.y = Math.sin(clock.getElapsedTime() * 1.05) * 0.03;
     renderer.render(scene, camera);
   }
 
-  animate(0);
+  animate();
 
   const api = {
     showProduct,
