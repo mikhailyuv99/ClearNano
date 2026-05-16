@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { createCleaningMachine } from "./procedural-machine.js";
+import { createCleaningMachine, loadClearNanoLogo } from "./procedural-machine.js";
 import { isMobilePerfMode } from "./device.js";
 
 const TARGET_SIZE = 2.5;
@@ -64,10 +64,6 @@ export function initHeroScene(canvas) {
   rim.position.set(0, 2, -8);
   scene.add(rim);
 
-  const machine = createCleaningMachine({ lite });
-  fitModel(machine);
-  scene.add(machine);
-
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
   controls.dampingFactor = 0.06;
@@ -76,15 +72,26 @@ export function initHeroScene(canvas) {
   controls.minPolarAngle = Math.PI * 0.18;
   controls.maxPolarAngle = Math.PI * 0.82;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const spinSpeed = reducedMotion ? 0 : 1.25;
+  const spinSpeed = reducedMotion ? 0 : 0.65;
+
+  let machine = null;
+  const whenReady = loadClearNanoLogo()
+    .catch(() => null)
+    .then((logoTexture) => {
+      machine = createCleaningMachine({ lite, logoTexture });
+      fitModel(machine);
+      scene.add(machine);
+      machine.userData.userSpinning = true;
+      frameCamera(camera, controls, machine);
+      return machine;
+    });
 
   controls.addEventListener("start", () => {
-    machine.userData.userSpinning = false;
+    if (machine) machine.userData.userSpinning = false;
   });
   controls.addEventListener("end", () => {
-    machine.userData.userSpinning = true;
+    if (machine) machine.userData.userSpinning = true;
   });
-  machine.userData.userSpinning = true;
 
   function resize() {
     const parent = canvas.parentElement;
@@ -95,7 +102,7 @@ export function initHeroScene(canvas) {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    frameCamera(camera, controls, machine);
+    if (machine) frameCamera(camera, controls, machine);
   }
 
   resize();
@@ -107,7 +114,7 @@ export function initHeroScene(canvas) {
   function tick() {
     raf = requestAnimationFrame(tick);
     controls.update();
-    if (spinSpeed > 0 && machine.userData.userSpinning !== false) {
+    if (machine && spinSpeed > 0 && machine.userData.userSpinning !== false) {
       machine.rotation.y += clock.getDelta() * spinSpeed;
     }
     renderer.render(scene, camera);
@@ -115,7 +122,7 @@ export function initHeroScene(canvas) {
   tick();
 
   return {
-    whenReady: Promise.resolve(),
+    whenReady,
     showProduct(_slug, options = {}) {
       options.onTransitionStart?.();
       options.onWordReveal?.();
@@ -128,7 +135,8 @@ export function initHeroScene(canvas) {
       cancelAnimationFrame(raf);
       ro.disconnect();
       renderer.dispose();
-      machine.traverse((c) => {
+      machine?.userData?.logoTexture?.dispose?.();
+      machine?.traverse((c) => {
         c.geometry?.dispose?.();
         if (c.material) {
           const mats = Array.isArray(c.material) ? c.material : [c.material];

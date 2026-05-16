@@ -48,6 +48,54 @@ function glassMat(lite) {
   });
 }
 
+const LOGO_URL = "/images/optimized/logo-p0-img0.webp";
+
+export function loadClearNanoLogo(url = LOGO_URL) {
+  return new Promise((resolve, reject) => {
+    new THREE.TextureLoader().load(
+      url,
+      (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.anisotropy = 4;
+        tex.minFilter = THREE.LinearMipmapLinearFilter;
+        tex.generateMipmaps = true;
+        resolve(tex);
+      },
+      undefined,
+      reject
+    );
+  });
+}
+
+function logoScreenMat(logoTexture) {
+  return new THREE.MeshStandardMaterial({
+    map: logoTexture,
+    color: 0xffffff,
+    metalness: 0.12,
+    roughness: 0.38,
+    emissive: 0x0a1018,
+    emissiveIntensity: 0.2,
+  });
+}
+
+function addLogoBadge(root, logoTexture, { x, y, z, height }) {
+  const img = logoTexture.image;
+  const aspect = img?.width && img?.height ? img.width / img.height : 2.4;
+  const h = height;
+  const badge = new THREE.Mesh(
+    new THREE.PlaneGeometry(h * aspect, h),
+    new THREE.MeshBasicMaterial({
+      map: logoTexture,
+      transparent: true,
+      depthWrite: true,
+      toneMapped: false,
+    })
+  );
+  badge.position.set(x, y, z);
+  root.add(badge);
+  return badge;
+}
+
 function miniHelmet() {
   const g = new THREE.Group();
   const profile = [
@@ -82,7 +130,7 @@ function miniHelmet() {
 }
 
 /** Bulkier kiosk proportions — wide footprint, real cabinet depth. */
-export function createCleaningMachine({ lite = false } = {}) {
+export function createCleaningMachine({ lite = false, logoTexture = null } = {}) {
   const root = new THREE.Group();
   root.name = "CleaningMachine";
 
@@ -210,23 +258,35 @@ export function createCleaningMachine({ lite = false } = {}) {
   topBevel.position.y = 0.86;
   root.add(topBevel);
 
-  const screenFront = new THREE.Mesh(
-    new THREE.BoxGeometry(W * 0.88, 0.36, 0.028),
-    new THREE.MeshStandardMaterial({ color: COLORS.screen, metalness: 0.4, roughness: 0.32 })
-  );
+  const screenMat = logoTexture
+    ? logoScreenMat(logoTexture)
+    : new THREE.MeshStandardMaterial({ color: COLORS.screen, metalness: 0.4, roughness: 0.32 });
+
+  const screenFront = new THREE.Mesh(new THREE.BoxGeometry(W * 0.88, 0.36, 0.028), screenMat);
   screenFront.position.set(0, 1.18, D / 2 + 0.025);
   root.add(screenFront);
 
-  const screenSideL = new THREE.Mesh(
-    new THREE.BoxGeometry(0.028, 0.32, D * 0.82),
-    new THREE.MeshStandardMaterial({ color: COLORS.screen, metalness: 0.4, roughness: 0.32 })
-  );
+  const sideScreenMat = logoTexture
+    ? logoScreenMat(logoTexture)
+    : new THREE.MeshStandardMaterial({ color: COLORS.screen, metalness: 0.4, roughness: 0.32 });
+
+  const screenSideL = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.32, D * 0.82), sideScreenMat);
   screenSideL.position.set(-W / 2 - 0.02, 1.14, 0);
   root.add(screenSideL);
 
-  const screenSideR = screenSideL.clone();
-  screenSideR.position.x = W / 2 + 0.02;
+  const screenSideR = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.32, D * 0.82), sideScreenMat.clone());
+  screenSideR.position.set(W / 2 + 0.02, 1.14, 0);
   root.add(screenSideR);
+
+  if (logoTexture) {
+    addLogoBadge(root, logoTexture, {
+      x: 0,
+      y: 0.22,
+      z: D / 2 + 0.034,
+      height: 0.12,
+    });
+    root.userData.logoTexture = logoTexture;
+  }
 
   return root;
 }
