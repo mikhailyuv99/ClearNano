@@ -1,9 +1,10 @@
-import "./page-fade.js";
 import "./hero-model-preload.js";
+import "./page-fade.js";
 import { initPageBgPin } from "./page-bg-pin.js";
 import { initHeroExperience } from "./hero-init.js";
 
 initPageBgPin();
+void initHeroExperience();
 
 const PRICE = 20000;
 const DAYS = 30;
@@ -74,5 +75,3 @@ Promise.all([import("./smooth-scroll.js"), import("./scroll-effects.js")]).then(
 if (location.hash === "#partner" || location.hash === "#business") {
   document.getElementById("partner")?.scrollIntoView({ behavior: "smooth" });
 }
-
-void initHeroExperience();

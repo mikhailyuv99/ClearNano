@@ -17,21 +17,24 @@ sharedDraco.preload();
 
 const meshoptReady = MeshoptDecoder.ready;
 
-/** Start decoding the default hero model as soon as this module loads. */
-function startRawGltfPreload(slug) {
-  return meshoptReady.then(() => {
+/** Parse helmet from primed bytes the moment this module loads. */
+function preloadHelmetGltf() {
+  const bytesReady = ensureModelBytes(FIRST_HERO_SLUG);
+
+  return meshoptReady.then(async () => {
     const loader = createLoader();
     loader.setMeshoptDecoder(MeshoptDecoder);
+
+    const cached = getCachedModelBytes(FIRST_HERO_SLUG);
+    const bytes = cached || (await bytesReady);
+
     return new Promise((resolve, reject) => {
-      loader.load(modelUrl(slug), resolve, undefined, reject);
+      loader.parse(bytes, modelUrl(FIRST_HERO_SLUG), resolve, reject);
     });
   });
 }
 
-const helmetGltfPreload = startRawGltfPreload(FIRST_HERO_SLUG);
-if (typeof fetch === "function") {
-  fetch(modelUrl(FIRST_HERO_SLUG), { priority: "high" }).catch(() => {});
-}
+const helmetGltfPreload = preloadHelmetGltf();
 
 const TARGET_SIZE = 2.35;
 /** Keep in sync with --hero-word-fade-out / --hero-word-fade-in in styles.css */
@@ -537,11 +540,15 @@ function frameCamera(camera, controls, object, padding = getFramePadding()) {
 
 function createLoader() {
   const loader = new GLTFLoader();
-  const draco = new DRACOLoader();
-  draco.setDecoderPath("/draco/");
-  draco.preload();
-  loader.setDRACOLoader(draco);
+  loader.setDRACOLoader(sharedDraco);
   return loader;
+}
+
+function buildEnvironmentMap(renderer) {
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const map = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  pmrem.dispose();
+  return map;
 }
 
 function setStageMessage(container, type, text) {
@@ -615,11 +622,12 @@ export function initHeroHelmet(canvas, products = []) {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
 
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  const envScene = new RoomEnvironment();
-  let envMap = pmrem.fromScene(envScene, 0.04).texture;
-  pmrem.dispose();
-  scene.environment = envMap;
+  let envMap = null;
+  const envMapReady = buildEnvironmentMap(renderer).then((map) => {
+    envMap = map;
+    scene.environment = map;
+    return map;
+  });
 
   scene.add(new THREE.HemisphereLight(0xdbeafe, 0x0f172a, 0.85));
   scene.add(new THREE.AmbientLight(0xffffff, 0.2));
@@ -721,6 +729,8 @@ export function initHeroHelmet(canvas, products = []) {
   }
 
   async function processGltf(gltf, slug) {
+    if (!envMap) await envMapReady;
+
     stripLikelyBackground(gltf.scene);
     const model = centerAndScale(gltf.scene.clone(true));
     applyMaterialsForSlug(model, slug, envMap, slug !== "helmet");
@@ -827,6 +837,7 @@ export function initHeroHelmet(canvas, products = []) {
       framed = true;
       currentModel = next;
       hideStageMessage(container);
+      document.body.classList.add("is-page-ready");
       onModelReady?.();
       onWordReveal?.();
       prefetchNextGpu(slug);

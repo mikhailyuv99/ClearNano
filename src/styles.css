@@ -179,7 +179,7 @@ body {
 
   body.is-page-ready {
     opacity: 1;
-    transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
 

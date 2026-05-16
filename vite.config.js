@@ -5,6 +5,7 @@ export default defineConfig({
   publicDir: "public",
   build: {
     outDir: "dist",
+    modulePreload: { polyfill: true },
     rollupOptions: {
       input: {
         main: "index.html",
