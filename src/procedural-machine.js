@@ -119,58 +119,30 @@ function drawPhoneIcon(ctx, x, y, size, color) {
   ctx.restore();
 }
 
-function drawMailIcon(ctx, x, y, size, color) {
-  ctx.save();
-  ctx.strokeStyle = color;
-  ctx.fillStyle = "transparent";
-  ctx.lineWidth = 3;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  const w = size * 1.15;
-  const h = size * 0.72;
-  const left = x - w / 2;
-  const top = y - h / 2;
-  ctx.strokeRect(left, top, w, h);
-  ctx.beginPath();
-  ctx.moveTo(left, top);
-  ctx.lineTo(x, top + h * 0.55);
-  ctx.lineTo(left + w, top);
-  ctx.stroke();
-  ctx.restore();
-}
+const COMPANY_PHONE = "0902 164 414";
 
-export function createContactPanelTexture() {
+export function createPhoneScreenTexture() {
   const canvas = document.createElement("canvas");
-  canvas.width = 640;
-  canvas.height = 200;
+  canvas.width = 720;
+  canvas.height = 280;
   const ctx = canvas.getContext("2d");
   const accent = "#22d3ee";
-  const text = "#e8eef4";
-  const muted = "#8b9cb0";
+  const cx = canvas.width / 2;
 
   ctx.fillStyle = "#0a0f14";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const phone = "0902 164 414";
-  const email = "clearnanovn@gmail.com";
-  const rowY = [58, 142];
-  const iconX = 72;
-  const textX = 118;
+  drawPhoneIcon(ctx, cx, 92, 46, accent);
 
-  drawPhoneIcon(ctx, iconX, rowY[0], 34, accent);
-  drawMailIcon(ctx, iconX, rowY[1], 34, accent);
-
-  ctx.textAlign = "left";
+  ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = text;
-  ctx.font = "600 30px system-ui, Segoe UI, sans-serif";
-  ctx.fillText(phone, textX, rowY[0]);
-  ctx.fillText(email, textX, rowY[1]);
+  ctx.fillStyle = "#e8eef4";
+  ctx.font = "700 54px system-ui, Segoe UI, sans-serif";
+  ctx.fillText(COMPANY_PHONE, cx, 168);
 
-  ctx.fillStyle = muted;
-  ctx.font = "500 18px system-ui, Segoe UI, sans-serif";
-  ctx.fillText("Hotline", textX, rowY[0] - 28);
-  ctx.fillText("Email", textX, rowY[1] - 28);
+  ctx.fillStyle = "#8b9cb0";
+  ctx.font = "500 22px system-ui, Segoe UI, sans-serif";
+  ctx.fillText("Hotline", cx, 218);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -346,14 +318,17 @@ export function createCleaningMachine({ lite = false, logoTexture = null } = {})
   screenFront.position.set(0, 1.18, D / 2 + 0.025);
   root.add(screenFront);
 
-  if (logoTexture) {
-    addCenteredLogoPlane(root, logoTexture, {
-      y: 1.18,
-      z: D / 2 + 0.042,
-      maxHeight: 0.3,
-    });
-    root.userData.logoTexture = logoTexture;
-  }
+  const phoneTex = createPhoneScreenTexture();
+  const phoneAspect = canvasAspect(phoneTex);
+  const phoneH = 0.32;
+  const phoneW = Math.min(phoneH * phoneAspect, W * 0.84);
+  const phonePanel = new THREE.Mesh(
+    new THREE.PlaneGeometry(phoneW, phoneH),
+    new THREE.MeshBasicMaterial({ map: phoneTex, toneMapped: false })
+  );
+  phonePanel.position.set(0, 1.18, D / 2 + 0.042);
+  root.add(phonePanel);
+  root.userData.phoneScreenTexture = phoneTex;
 
   const screenSideL = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.32, D * 0.82), SCREEN_MAT);
   screenSideL.position.set(-W / 2 - 0.02, 1.14, 0);
@@ -363,17 +338,14 @@ export function createCleaningMachine({ lite = false, logoTexture = null } = {})
   screenSideR.position.set(W / 2 + 0.02, 1.14, 0);
   root.add(screenSideR);
 
-  const contactTex = createContactPanelTexture();
-  const contactAspect = canvasAspect(contactTex);
-  const contactH = 0.17;
-  const contactW = contactH * contactAspect;
-  const contactPanel = new THREE.Mesh(
-    new THREE.PlaneGeometry(Math.min(contactW, W * 0.82), contactH),
-    new THREE.MeshBasicMaterial({ map: contactTex, toneMapped: false })
-  );
-  contactPanel.position.set(0, -0.1, D / 2 + 0.038);
-  root.add(contactPanel);
-  root.userData.contactTexture = contactTex;
+  if (logoTexture) {
+    addCenteredLogoPlane(root, logoTexture, {
+      y: -0.1,
+      z: D / 2 + 0.042,
+      maxHeight: 0.14,
+    });
+    root.userData.logoTexture = logoTexture;
+  }
 
   return root;
 }

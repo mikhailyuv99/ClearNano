@@ -136,7 +136,7 @@ export function initHeroScene(canvas) {
       ro.disconnect();
       renderer.dispose();
       machine?.userData?.logoTexture?.dispose?.();
-      machine?.userData?.contactTexture?.dispose?.();
+      machine?.userData?.phoneScreenTexture?.dispose?.();
       machine?.traverse((c) => {
         c.geometry?.dispose?.();
         if (c.material) {
