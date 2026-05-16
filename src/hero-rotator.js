@@ -11,7 +11,7 @@ export function initHeroRotator(api, products) {
   const wrap = document.querySelector(".hero-word-wrap");
   const layerA = document.querySelector("[data-hero-word-a]");
   const layerB = document.querySelector("[data-hero-word-b]");
-  const canvas = document.getElementById("hero-helmet-canvas");
+  const viewer = document.getElementById("hero-helmet-viewer");
 
   if (!wrap || !layerA || !layerB || !products?.length) return;
 
@@ -27,9 +27,9 @@ export function initHeroRotator(api, products) {
     return frontIsA ? layerB : layerA;
   }
 
-  function setCanvasLabel(word) {
-    if (!canvas) return;
-    canvas.setAttribute("aria-label", `Interactive 3D ${word}, drag to rotate`);
+  function setViewerLabel(word) {
+    if (!viewer) return;
+    viewer.setAttribute("alt", `Interactive 3D ${word}, drag to rotate`);
   }
 
   function clearWordTimer() {
@@ -67,7 +67,7 @@ export function initHeroRotator(api, products) {
     wrap.classList.remove("is-word-out");
     wrap.classList.add("is-word-in");
     frontIsA = !frontIsA;
-    setCanvasLabel(word);
+    setViewerLabel(word);
 
     wordTimer = window.setTimeout(() => {
       wrap.classList.remove("is-word-in");
@@ -76,7 +76,7 @@ export function initHeroRotator(api, products) {
   }
 
   setWord(products[0].word);
-  setCanvasLabel(products[0].word);
+  setViewerLabel(products[0].word);
 
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     stopRotation = null;

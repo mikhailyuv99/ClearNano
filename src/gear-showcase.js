@@ -1,4 +1,5 @@
 /** 3D gear previews via model-viewer + real glTF assets */
+import "@google/model-viewer";
 
 const GEAR = [
   { label: "Motorbike helmets", src: "/models/helmet.glb", orbit: "0deg 72deg 110%" },
