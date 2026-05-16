@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=overlays-content"
+    />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#050810" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -29,7 +32,19 @@
           ) ||
           (/Android/i.test(ua) && /;\s*wv\)|WebView/i.test(ua))
         ) {
-          document.documentElement.classList.add("is-inapp-browser", "is-inapp-scroll");
+          var r = document.documentElement;
+          r.classList.add("is-inapp-browser", "is-inapp-scroll");
+          var h = Math.round(window.innerHeight);
+          var w = Math.round(window.innerWidth);
+          r.style.setProperty("--app-height", h + "px");
+          r.style.setProperty("--app-width", w + "px");
+          var vp = document.querySelector('meta[name="viewport"]');
+          if (vp) {
+            vp.setAttribute(
+              "content",
+              "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=overlays-content"
+            );
+          }
         }
       })();
     </script>
@@ -49,6 +64,11 @@
         margin: 0 !important;
         padding: 0 !important;
         border-radius: 0 !important;
+        transform: none !important;
+      }
+      html.is-inapp-scroll .page-bg-stack {
+        width: var(--app-width, 100%) !important;
+        height: var(--app-height, 100%) !important;
         transform: none !important;
       }
     </style>

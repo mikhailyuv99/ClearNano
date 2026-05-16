@@ -1,32 +1,50 @@
 import { isInAppBrowser } from "./device.js";
 
-/** In-app WebViews: scroll #main instead of body so the fixed background never shifts. */
+function applyLockedViewport(root, w, h) {
+  root.style.setProperty("--app-width", `${w}px`);
+  root.style.setProperty("--app-height", `${h}px`);
+}
+
+function measureViewport() {
+  return {
+    w: Math.round(window.visualViewport?.width ?? window.innerWidth),
+    h: Math.round(window.visualViewport?.height ?? window.innerHeight),
+  };
+}
+
+/** In-app WebViews: scroll #main + viewport dimensions frozen (no resize-on-scroll zoom). */
 export function initPageBgPin() {
   if (!isInAppBrowser()) return;
 
   const root = document.documentElement;
   root.classList.add("is-inapp-browser", "is-inapp-scroll");
 
-  const lockHeight = () => {
-    root.style.setProperty("--app-height", `${window.innerHeight}px`);
+  const finalizeLock = () => {
+    const lock = measureViewport();
+    applyLockedViewport(root, lock.w, lock.h);
+    sessionStorage.setItem("cn-viewport-lock", JSON.stringify(lock));
   };
 
-  lockHeight();
-  window.addEventListener("orientationchange", () => setTimeout(lockHeight, 400), { passive: true });
-
-  let lastH = window.innerHeight;
-  window.addEventListener(
-    "resize",
-    () => {
-      const h = window.innerHeight;
-      if (Math.abs(h - lastH) > 48) {
-        lastH = h;
-        lockHeight();
+  try {
+    const stored = sessionStorage.getItem("cn-viewport-lock");
+    if (stored) {
+      const { w, h } = JSON.parse(stored);
+      if (w > 0 && h > 0) {
+        applyLockedViewport(root, w, h);
+      } else {
+        finalizeLock();
       }
-    },
-    { passive: true }
-  );
+    } else {
+      finalizeLock();
+    }
+  } catch {
+    finalizeLock();
+  }
 
-  setTimeout(lockHeight, 250);
-  setTimeout(lockHeight, 800);
+  requestAnimationFrame(finalizeLock);
+
+  window.addEventListener("orientationchange", () => {
+    sessionStorage.removeItem("cn-viewport-lock");
+    setTimeout(finalizeLock, 600);
+  });
 }
