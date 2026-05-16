@@ -3,11 +3,22 @@
 @media (max-width: 768px), (pointer: coarse) {
   html {
     scroll-behavior: auto;
+    height: 100%;
   }
 
   html,
   body {
-    overscroll-behavior-y: none;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .page-bg-stack {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: var(--page-bg-h, 100dvh);
+    margin: 0;
+    transform: translate3d(0, 0, 0);
   }
 }
 

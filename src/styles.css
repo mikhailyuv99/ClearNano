@@ -39,13 +39,13 @@ html {
   --header-h: 76px;
   --container: min(1180px, calc(100% - 2.5rem));
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --bg-blur: 8px;
+  --bg-blur: 14px;
 }
 
 @media (max-width: 900px) {
   :root {
     --glass-blur: blur(10px) saturate(1.15);
-    --bg-blur: 5px;
+    --bg-blur: 12px;
   }
 }
 
@@ -104,7 +104,7 @@ html {
 /* Blurred full-page background  sticky stack (fixed drifts on iOS Safari) */
 .page-bg-stack {
   --page-bg-h: 100dvh;
-  position: sticky;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -113,12 +113,18 @@ html {
   min-height: 100vh;
   min-height: 100dvh;
   min-height: 100svh;
-  z-index: -2;
-  margin-bottom: calc(-1 * var(--page-bg-h));
+  min-height: -webkit-fill-available;
+  z-index: 0;
   overflow: hidden;
   pointer-events: none;
   isolation: isolate;
   transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+body > :not(.page-bg-stack) {
+  position: relative;
+  z-index: 1;
 }
 
 .page-bg {

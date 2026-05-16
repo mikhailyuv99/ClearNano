@@ -1,6 +1,6 @@
 import { isMobilePerfMode } from "./device.js";
 
-/** Keep full-page art pinned on iOS Safari (fixed + URL bar scroll drift). */
+/** Sync background height when iOS Safari chrome resizes — never move it on scroll. */
 export function initPageBgPin() {
   if (!isMobilePerfMode()) return;
 
@@ -8,14 +8,11 @@ export function initPageBgPin() {
   const vv = window.visualViewport;
   if (!stack || !vv) return;
 
-  const sync = () => {
-    const h = Math.round(vv.height);
-    stack.style.setProperty("--page-bg-h", `${h}px`);
-    stack.style.transform = vv.offsetTop ? `translate3d(0, ${vv.offsetTop}px, 0)` : "";
+  const syncHeight = () => {
+    stack.style.setProperty("--page-bg-h", `${Math.round(vv.height)}px`);
   };
 
-  vv.addEventListener("resize", sync, { passive: true });
-  vv.addEventListener("scroll", sync, { passive: true });
-  window.addEventListener("orientationchange", sync, { passive: true });
-  sync();
+  vv.addEventListener("resize", syncHeight, { passive: true });
+  window.addEventListener("orientationchange", syncHeight, { passive: true });
+  syncHeight();
 }
