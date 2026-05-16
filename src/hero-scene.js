@@ -3,7 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { createCleaningMachine, loadClearNanoLogo } from "./procedural-machine.js";
 import { isMobilePerfMode } from "./device.js";
 
-const TARGET_SIZE = 2.5;
+const TARGET_SIZE = 3.55;
 
 function fitModel(model) {
   const box = new THREE.Box3().setFromObject(model);
@@ -14,15 +14,23 @@ function fitModel(model) {
   model.scale.setScalar(TARGET_SIZE / maxDim);
 }
 
-function frameCamera(camera, controls, object) {
+function frameCamera(camera, controls, object, viewportAspect = 1) {
   const box = new THREE.Box3().setFromObject(object);
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
   const maxDim = Math.max(size.x, size.y, size.z, 0.001);
   const fovRad = (camera.fov * Math.PI) / 180;
-  const pad = window.innerWidth <= 959 ? 2.1 : 1.75;
+  const mobile = window.innerWidth <= 959;
+  const pad = mobile ? 1.85 : 1.52;
   const distance = (maxDim / 2 / Math.tan(fovRad / 2)) * pad;
-  camera.position.set(center.x + distance * 0.55, center.y + size.y * 0.04, center.z + distance * 0.72);
+  const ox = mobile ? 0.38 : 0.55;
+  const oy = mobile ? 0.02 : 0.04;
+  const oz = mobile ? 0.78 : 0.72;
+  camera.position.set(
+    center.x + distance * ox * (viewportAspect < 1.1 ? 0.92 : 1),
+    center.y + size.y * oy,
+    center.z + distance * oz
+  );
   camera.near = 0.05;
   camera.far = 200;
   camera.updateProjectionMatrix();
@@ -43,36 +51,40 @@ export function initHeroScene(canvas) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     alpha: true,
-    antialias: !lite,
+    antialias: true,
     powerPreference: "high-performance",
   });
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const dpr = Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 2);
   renderer.setPixelRatio(dpr);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.22;
 
-  scene.add(new THREE.HemisphereLight(0xdbeafe, 0x0f172a, 0.85));
-  scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-  const key = new THREE.DirectionalLight(0xffffff, 1.5);
+  scene.add(new THREE.HemisphereLight(0xdbeafe, 0x0f172a, lite ? 0.95 : 0.85));
+  if (!lite) {
+    scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+  }
+  const key = new THREE.DirectionalLight(0xffffff, lite ? 1.35 : 1.5);
   key.position.set(5, 10, 8);
   scene.add(key);
-  const fill = new THREE.DirectionalLight(0x5eead4, 0.55);
-  fill.position.set(-6, 3, 4);
-  scene.add(fill);
-  const rim = new THREE.DirectionalLight(0x88ccff, 0.4);
-  rim.position.set(0, 2, -8);
-  scene.add(rim);
+  if (!lite) {
+    const fill = new THREE.DirectionalLight(0x5eead4, 0.55);
+    fill.position.set(-6, 3, 4);
+    scene.add(fill);
+    const rim = new THREE.DirectionalLight(0x88ccff, 0.4);
+    rim.position.set(0, 2, -8);
+    scene.add(rim);
+  }
 
   const controls = new OrbitControls(camera, canvas);
-  controls.enableDamping = true;
+  controls.enableDamping = !lite;
   controls.dampingFactor = 0.06;
   controls.enablePan = false;
   controls.enableZoom = false;
   controls.minPolarAngle = Math.PI * 0.18;
   controls.maxPolarAngle = Math.PI * 0.82;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const spinSpeed = reducedMotion ? 0 : 0.65;
+  const spinSpeed = reducedMotion ? 0 : lite ? 0.5 : 0.65;
 
   let machine = null;
   const whenReady = loadClearNanoLogo()
@@ -82,7 +94,11 @@ export function initHeroScene(canvas) {
       fitModel(machine);
       scene.add(machine);
       machine.userData.userSpinning = true;
-      frameCamera(camera, controls, machine);
+      const parent = canvas.parentElement;
+      const aspect = parent
+        ? parent.getBoundingClientRect().width / Math.max(1, parent.getBoundingClientRect().height)
+        : 1;
+      frameCamera(camera, controls, machine, aspect);
       return machine;
     });
 
@@ -102,17 +118,27 @@ export function initHeroScene(canvas) {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    if (machine) frameCamera(camera, controls, machine);
+    if (machine) frameCamera(camera, controls, machine, w / h);
   }
 
   resize();
   const ro = new ResizeObserver(resize);
   ro.observe(canvas.parentElement);
 
+  let inView = true;
+  const viewObserver = new IntersectionObserver(
+    ([entry]) => {
+      inView = entry.isIntersecting;
+    },
+    { root: null, threshold: 0.08 }
+  );
+  viewObserver.observe(canvas);
+
   const clock = new THREE.Clock();
   let raf = 0;
   function tick() {
     raf = requestAnimationFrame(tick);
+    if (!inView) return;
     controls.update();
     if (machine && spinSpeed > 0 && machine.userData.userSpinning !== false) {
       machine.rotation.y += clock.getDelta() * spinSpeed;
@@ -134,6 +160,7 @@ export function initHeroScene(canvas) {
     dispose() {
       cancelAnimationFrame(raf);
       ro.disconnect();
+      viewObserver.disconnect();
       renderer.dispose();
       machine?.userData?.logoTexture?.dispose?.();
       machine?.userData?.topContactTexture?.dispose?.();

@@ -1,6 +1,7 @@
 import "./hero-boot.js";
 import "./page-fade.js";
 import { initPageBgPin } from "./page-bg-pin.js";
+import { initMobileMenu } from "./mobile-menu.js";
 
 document.body.classList.add("is-page-ready");
 
@@ -23,27 +24,7 @@ function onHeaderScroll() {
   header?.classList.toggle("is-scrolled", window.scrollY > 20);
 }
 
-const toggle = document.querySelector("[data-menu-toggle]");
-const mobileNav = document.querySelector("[data-mobile-nav]");
-
-function closeMenu() {
-  toggle?.setAttribute("aria-expanded", "false");
-  mobileNav?.classList.remove("is-open");
-  document.body.classList.remove("menu-open");
-}
-
-function openMenu() {
-  toggle?.setAttribute("aria-expanded", "true");
-  mobileNav?.classList.add("is-open");
-  document.body.classList.add("menu-open");
-}
-
-toggle?.addEventListener("click", () => {
-  if (mobileNav?.classList.contains("is-open")) closeMenu();
-  else openMenu();
-});
-
-mobileNav?.querySelectorAll("a").forEach((a) => a.addEventListener("click", closeMenu));
+initMobileMenu();
 
 const range = document.querySelector("[data-uses-range]");
 const label = document.querySelector("[data-uses-label]");

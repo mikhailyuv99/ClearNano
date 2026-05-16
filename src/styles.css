@@ -436,9 +436,14 @@ h4 {
   width: 46px;
   height: 46px;
   padding: 0;
+  border: none;
   border-radius: 14px;
   cursor: pointer;
   flex-shrink: 0;
+  position: relative;
+  z-index: 220;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .menu-toggle__bar {
@@ -470,8 +475,11 @@ h4 {
 .mobile-nav {
   display: none;
   position: fixed;
-  inset: var(--header-h) 0 0 0;
-  z-index: 180;
+  top: var(--header-h);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 190;
   flex-direction: column;
   gap: 0.4rem;
   padding: 1rem 1.25rem 1.5rem;
@@ -484,7 +492,8 @@ h4 {
 }
 
 .mobile-nav.is-open {
-  display: flex;
+  display: flex !important;
+  visibility: visible;
 }
 
 .mobile-nav a {
@@ -604,37 +613,40 @@ h4 {
   vertical-align: baseline;
   max-width: 100%;
   white-space: nowrap;
+  line-height: inherit;
 }
 
 .hero-word-slot {
   display: inline-block;
-  position: relative;
   vertical-align: baseline;
+  position: relative;
+  line-height: inherit;
 }
 
-/* Hidden layers are out of flow so slot width = visible word only */
 .hero-word-layer {
   position: absolute;
   left: 0;
   top: 0;
   display: inline-block;
+  vertical-align: baseline;
   white-space: nowrap;
   max-width: 100%;
   background: var(--gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  font-size: clamp(1.65rem, 4.8cqw + 0.95rem, 3.85rem);
-  letter-spacing: -0.04em;
+  font: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
   opacity: 0;
-  transform: translate3d(0, 0.14em, 0);
-  filter: blur(3px);
+  transform: translate3d(0, 0.32em, 0);
   transition:
-    opacity 0.52s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.52s cubic-bezier(0.4, 0, 0.2, 1),
-    filter 0.52s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity 0.52s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.52s cubic-bezier(0.22, 1, 0.36, 1);
   pointer-events: none;
   visibility: hidden;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
 }
 
 .hero-word-layer.is-visible {
@@ -644,8 +656,26 @@ h4 {
   visibility: visible;
   opacity: 1;
   transform: translate3d(0, 0, 0);
-  filter: blur(0);
   z-index: 1;
+}
+
+.hero-word-layer.is-visible.is-entering,
+.hero-word-layer.is-visible.is-exiting {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.hero-word-layer.is-visible.is-entering {
+  opacity: 0;
+  transform: translate3d(0, 0.32em, 0);
+  z-index: 2;
+}
+
+.hero-word-layer.is-visible.is-exiting {
+  opacity: 0;
+  transform: translate3d(0, -0.28em, 0);
+  z-index: 0;
 }
 
 /* Period glued to the word ù fades with the layer */
@@ -658,35 +688,18 @@ h4 {
   background-clip: unset;
 }
 
-.hero-word-wrap.is-word-out .hero-word-layer.is-visible {
-  opacity: 0;
-  transform: translate3d(0, -0.12em, 0);
-  filter: blur(4px);
-}
-
-.hero-word-wrap.is-word-in .hero-word-layer.is-visible {
-  animation: heroWordIn 0.62s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes heroWordIn {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 0.12em, 0);
-    filter: blur(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-    filter: blur(0);
+@media (max-width: 768px) {
+  .hero-word-layer {
+    transition-duration: 0.4s;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-word-layer {
     transition: none;
-    filter: none;
     opacity: 1;
     transform: none;
+    will-change: auto;
   }
 
   .hero-word-layer:not(.is-visible) {
@@ -742,29 +755,27 @@ h4 {
 
 .hero-helmet-scene {
   position: relative;
-  width: min(100%, 520px);
-  height: min(52vh, 480px);
-  min-height: 280px;
+  width: min(100%, 640px);
+  height: min(58vh, 580px);
+  min-height: 380px;
   margin: 0 auto;
   overflow: visible;
   background: transparent;
   border: none;
   box-shadow: none;
   outline: none;
-  padding-bottom: 3.5rem;
-  box-sizing: content-box;
+  padding-bottom: 0;
+  box-sizing: border-box;
+  pointer-events: none;
 }
 
 .hero-helmet-scene canvas {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: -3.5rem;
+  inset: 0;
   z-index: 1;
   display: block;
   width: 100% !important;
-  height: calc(100% + 3.5rem) !important;
+  height: 100% !important;
   margin: 0;
   padding: 0;
   border: none;
@@ -812,98 +823,6 @@ h4 {
   display: flex;
 }
 
-.hero-card {
-  position: absolute;
-  z-index: 3;
-  padding: 0;
-  background: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: none !important;
-  box-shadow: none !important;
-  pointer-events: none;
-}
-
-.hero-card__inner {
-  padding: 0.85rem 1.1rem;
-  border-radius: 16px;
-  background: rgba(10, 16, 28, 0.62);
-  backdrop-filter: blur(12px) saturate(1.25);
-  -webkit-backdrop-filter: blur(12px) saturate(1.25);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  pointer-events: auto;
-  contain: layout style;
-  transform: translate3d(0, 0, 0);
-  animation: heroCardFloat 5s ease-in-out infinite;
-  transition:
-    transform 0.35s var(--ease),
-    border-color 0.35s var(--ease);
-}
-
-.hero-card strong {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--teal);
-}
-
-.hero-card span {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.hero-card--time {
-  top: 8%;
-  left: -4%;
-}
-
-.hero-card--shield {
-  bottom: 12%;
-  right: -2%;
-}
-
-.hero-card--shield .hero-card__inner {
-  animation-delay: -2.5s;
-}
-
-@keyframes heroCardFloat {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-  50% {
-    transform: translate3d(0, -10px, 0);
-  }
-}
-
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .hero-card:hover .hero-card__inner {
-    animation-play-state: paused;
-    transform: translate3d(0, -8px, 0);
-    border-color: rgba(45, 212, 191, 0.38);
-  }
-}
-
-@media (hover: none) and (prefers-reduced-motion: no-preference) {
-  .hero-card:active .hero-card__inner {
-    animation-play-state: paused;
-    transform: translate3d(0, -6px, 0);
-    border-color: rgba(45, 212, 191, 0.38);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-card__inner {
-    animation: none;
-  }
-}
-
 .stats-strip {
   position: relative;
   z-index: 1;
@@ -948,29 +867,21 @@ h4 {
 
 @media (min-width: 960px) {
   .hero-grid {
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: 1.5rem;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 1.25rem 2rem;
     padding-bottom: 0.75rem;
+    align-items: center;
+  }
+
+  .hero-visual {
+    justify-self: end;
+    width: 100%;
   }
 
   .hero-helmet-scene {
-    width: min(100%, 480px);
-    height: min(48vh, 440px);
-    min-height: 300px;
-  }
-
-  /* Flank the machine without shrinking the 3D canvas */
-  .hero-card--time {
-    top: 50%;
-    left: 0;
-    transform: translateY(-85%);
-  }
-
-  .hero-card--shield {
-    top: 50%;
-    right: 0;
-    bottom: auto;
-    transform: translateY(15%);
+    width: min(100%, 640px);
+    height: min(60vh, 600px);
+    min-height: 420px;
   }
 }
 

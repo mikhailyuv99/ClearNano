@@ -45,7 +45,7 @@
   }
 
   .hero-copy__head .hero-lead {
-    margin-bottom: 0.15rem;
+    margin-bottom: 0.65rem;
   }
 
   .hero-copy__head h1 {
@@ -57,46 +57,23 @@
     width: 100%;
     min-height: 0 !important;
     padding: 0 !important;
-    margin: 0;
+    margin: 0 0 -0.75rem;
   }
 
   .hero-copy__foot {
     order: 3;
     width: 100%;
-    margin-top: 0;
+    margin-top: -0.5rem;
   }
 
   .hero-helmet-scene {
-    width: min(100%, 270px);
-    height: 200px;
-    min-height: 175px;
-    max-height: 220px;
+    width: min(100%, 400px);
+    height: min(46vh, 320px);
+    min-height: 260px;
+    max-height: 340px;
     margin-inline: auto;
-    padding-bottom: 2.75rem;
+    padding-bottom: 0;
     overflow: visible;
-  }
-
-  .hero-helmet-scene canvas {
-    bottom: -2.75rem;
-    height: calc(100% + 2.75rem) !important;
-  }
-
-  .hero-card--time {
-    top: 0;
-    left: 0;
-  }
-
-  .hero-card--shield {
-    bottom: 2%;
-    right: 0;
-  }
-
-  .hero-card__inner {
-    padding: 0.65rem 0.85rem;
-  }
-
-  .hero-card strong {
-    font-size: 1.15rem;
   }
 
   .hero-actions {
@@ -124,17 +101,32 @@
   }
 
   .hero-helmet-scene {
-    width: min(100%, 250px);
-    height: 185px;
-    min-height: 165px;
-    max-height: 200px;
+    width: min(100%, 380px);
+    height: min(44vh, 300px);
+    min-height: 250px;
+    max-height: 320px;
   }
 }
 
 /* Header + menu */
 @media (max-width: 1023px) {
+  :root {
+    --header-h: calc(76px + env(safe-area-inset-top, 0px));
+  }
+
   .site-header {
     z-index: 200;
+    padding-top: env(safe-area-inset-top, 0px);
+    height: var(--header-h);
+    box-sizing: border-box;
+    pointer-events: auto;
+  }
+
+  .header-shell,
+  .header-inner {
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
   }
 
   body.menu-open .site-header .header-shell {
@@ -257,7 +249,6 @@
 
 /* Mobile performance — drop expensive glass blur (major GPU saver on iOS) */
 @media (max-width: 768px) {
-  .hero-card__inner,
   .site-header .header-shell,
   .site-footer,
   .mobile-nav,

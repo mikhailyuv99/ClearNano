@@ -11,11 +11,18 @@ const COLORS = {
 };
 
 function bodyMat(lite) {
+  if (lite) {
+    return new THREE.MeshStandardMaterial({
+      color: COLORS.body,
+      metalness: 0.12,
+      roughness: 0.26,
+    });
+  }
   return new THREE.MeshPhysicalMaterial({
     color: COLORS.body,
     metalness: 0.14,
     roughness: 0.22,
-    clearcoat: lite ? 0.3 : 0.78,
+    clearcoat: 0.78,
     clearcoatRoughness: 0.08,
   });
 }
@@ -148,9 +155,9 @@ function drawMailIcon(ctx, x, y, size, color = ICON_COLOR) {
   ctx.restore();
 }
 
-export function createTopContactTexture(panelAspect) {
+export function createTopContactTexture(panelAspect, lite = false) {
   const canvas = document.createElement("canvas");
-  const h = 520;
+  const h = lite ? 420 : 520;
   canvas.height = h;
   canvas.width = Math.round(h * panelAspect);
   const ctx = canvas.getContext("2d");
@@ -197,8 +204,9 @@ export function createTopContactTexture(panelAspect) {
   return tex;
 }
 
-function miniHelmet() {
+function miniHelmet(lite = false) {
   const g = new THREE.Group();
+  const segs = lite ? 16 : 32;
   const profile = [
     new THREE.Vector2(0.05, -0.5),
     new THREE.Vector2(0.38, -0.45),
@@ -209,12 +217,12 @@ function miniHelmet() {
   ];
   g.add(
     new THREE.Mesh(
-      new THREE.LatheGeometry(profile, 32),
+      new THREE.LatheGeometry(profile, segs),
       new THREE.MeshStandardMaterial({ color: 0xe8ecf0, metalness: 0.35, roughness: 0.35 })
     )
   );
   const visor = new THREE.Mesh(
-    new THREE.SphereGeometry(0.48, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.4),
+    new THREE.SphereGeometry(0.48, lite ? 12 : 24, lite ? 10 : 16, 0, Math.PI * 2, 0, Math.PI * 0.4),
     new THREE.MeshStandardMaterial({
       color: 0x1a2840,
       metalness: 0.2,
@@ -331,14 +339,16 @@ export function createCleaningMachine({ lite = false, logoTexture = null } = {})
   handle.position.set(-W * 0.38, 0.44, D / 2 + 0.022);
   root.add(handle);
 
-  const helmet = miniHelmet();
+  const helmet = miniHelmet(lite);
   helmet.position.set(0, 0.42, 0.06);
   helmet.scale.setScalar(0.24);
   root.add(helmet);
 
-  const uvLight = new THREE.PointLight(COLORS.uv, lite ? 0.8 : 2, 2);
-  uvLight.position.set(0, 0.48, 0.1);
-  root.add(uvLight);
+  if (!lite) {
+    const uvLight = new THREE.PointLight(COLORS.uv, 2, 2);
+    uvLight.position.set(0, 0.48, 0.1);
+    root.add(uvLight);
+  }
 
   const ledStrip = new THREE.Mesh(
     new THREE.BoxGeometry(W * 1.04, 0.035, D * 1.04),
@@ -363,7 +373,7 @@ export function createCleaningMachine({ lite = false, logoTexture = null } = {})
   const topPanelH = 0.48;
   const topPanelCenterY = 1.12;
   const topPanelAspect = topPanelW / topPanelH;
-  const topContactTex = createTopContactTexture(topPanelAspect);
+  const topContactTex = createTopContactTexture(topPanelAspect, lite);
   const topContactPanel = new THREE.Mesh(
     new THREE.PlaneGeometry(topPanelW, topPanelH),
     new THREE.MeshBasicMaterial({
