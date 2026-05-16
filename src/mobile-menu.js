@@ -5,12 +5,14 @@ export function initMobileMenu() {
   if (!toggle || !mobileNav) return () => {};
 
   const main = document.getElementById("main");
+  const backdrop = mobileNav.querySelector("[data-menu-backdrop]");
   let open = false;
 
   function setOpen(next) {
     open = next;
     toggle.setAttribute("aria-expanded", open ? "true" : "false");
     mobileNav.classList.toggle("is-open", open);
+    mobileNav.setAttribute("aria-hidden", open ? "false" : "true");
     document.documentElement.classList.toggle("menu-open", open);
     document.body.classList.toggle("menu-open", open);
     if (open) {
@@ -28,7 +30,9 @@ export function initMobileMenu() {
 
   toggle.addEventListener("click", onToggle);
 
-  mobileNav.addEventListener("click", (e) => {
+  backdrop?.addEventListener("click", () => setOpen(false));
+
+  mobileNav.querySelector(".mobile-nav__panel")?.addEventListener("click", (e) => {
     if (e.target.closest("a")) setOpen(false);
   });
 

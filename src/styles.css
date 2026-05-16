@@ -485,39 +485,57 @@ h4 {
 .mobile-nav {
   display: none;
   position: fixed;
-  top: var(--header-h);
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 150;
-  flex-direction: column;
-  gap: 0.4rem;
-  padding: 1rem 1.25rem max(1.5rem, env(safe-area-inset-bottom, 0px));
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  background: var(--glass-dark-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-top: 1px solid var(--glass-border);
+  inset: 0;
+  z-index: 199;
+  pointer-events: none;
 }
 
 .mobile-nav.is-open {
-  display: flex !important;
+  display: block !important;
   visibility: visible;
+  pointer-events: auto;
 }
 
-.mobile-nav a {
+.mobile-nav__backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: rgba(5, 8, 16, 0.55);
+  backdrop-filter: blur(40px) saturate(1.2);
+  -webkit-backdrop-filter: blur(40px) saturate(1.2);
+}
+
+.mobile-nav__panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-height: 100%;
+  padding: calc(var(--header-h) + 0.85rem) 1.25rem max(1.5rem, env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  pointer-events: auto;
+}
+
+.mobile-nav__panel a {
   padding: 0.85rem 1rem;
   color: var(--ink);
   font-weight: 600;
   font-size: 0.9375rem;
   border-radius: 12px;
   text-decoration: none;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-.mobile-nav a:hover {
+.mobile-nav__panel a:hover {
   background: var(--teal-light);
   color: var(--teal);
 }
