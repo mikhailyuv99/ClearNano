@@ -5,8 +5,9 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { modelUrl } from "./hero-products.js";
 import { ensureModelBytes } from "./hero-model-preload.js";
-import { HERO_GPU_CACHE_MAX, HERO_TARGET_FPS } from "./hero-config.js";
+import { HERO_GPU_CACHE_MAX, HERO_TARGET_FPS, HERO_SINGLE_MODEL } from "./hero-config.js";
 import { isMobilePerfMode } from "./device.js";
+import { createProceduralHelmet } from "./procedural-helmet.js";
 
 const FIRST_HERO_SLUG = "helmet";
 
@@ -737,9 +738,37 @@ export function initHeroHelmet(canvas, products = []) {
 
   const FALLBACK_SLUGS = ["helmet", "bicycle-helmet"];
 
+  async function buildProceduralHelmet(slug) {
+    if (!envMap) {
+      try {
+        envMap = await envMapReady;
+        scene.environment = envMap;
+      } catch {
+        /* basic materials still work */
+      }
+    }
+    const model = createProceduralHelmet(envMap, { lite: mobilePerf });
+    centerAndScale(model);
+    setModelOpacity(model, 1);
+    model.userData.slug = slug;
+    cache.set(slug, model);
+    availableSlugs.add(slug);
+    return model;
+  }
+
   async function loadModel(slug) {
     if (cache.has(slug)) return cache.get(slug);
     if (inflight.has(slug)) return inflight.get(slug);
+
+    if (HERO_SINGLE_MODEL) {
+      const task = buildProceduralHelmet(slug);
+      inflight.set(slug, task);
+      try {
+        return await task;
+      } finally {
+        inflight.delete(slug);
+      }
+    }
 
     const trySlugs =
       slug === "helmet" ? FALLBACK_SLUGS : [slug, ...FALLBACK_SLUGS.filter((s) => s !== slug)];
@@ -887,11 +916,14 @@ export function initHeroHelmet(canvas, products = []) {
     return p;
   }
 
-  const ready = Promise.all([envMapReady, loadModel(firstSlug)])
+  const ready = (HERO_SINGLE_MODEL
+    ? envMapReady.then(() => loadModel(firstSlug))
+    : Promise.all([envMapReady, loadModel(firstSlug)])
+  )
     .then(() => showProduct(firstSlug))
     .then(() => {
       hideStageMessage(container);
-      if (slugs.length > 1) prefetchNextGpu(firstSlug);
+      if (!HERO_SINGLE_MODEL && slugs.length > 1) prefetchNextGpu(firstSlug);
       return api;
     })
     .catch((err) => {
