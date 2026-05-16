@@ -1,6 +1,6 @@
-import { HERO_ROTATION, modelUrl } from "./hero-products.js";
+import { modelUrl } from "./hero-products.js";
 
-/** Shared byte cache — filled as soon as the app boots. */
+/** Shared byte cache — filled on demand only (no boot-time flood). */
 const bytes = new Map();
 const inflight = new Map();
 
@@ -26,14 +26,3 @@ export function ensureModelBytes(slug) {
   inflight.set(slug, task);
   return task;
 }
-
-/** Download every hero GLB in parallel (staggered slightly for Safari). */
-export function preloadAllHeroModelBytes() {
-  HERO_ROTATION.forEach(({ slug }, i) => {
-    window.setTimeout(() => {
-      ensureModelBytes(slug).catch(() => {});
-    }, i * 40);
-  });
-}
-
-preloadAllHeroModelBytes();

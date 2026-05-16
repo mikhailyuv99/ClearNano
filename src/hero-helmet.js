@@ -6,6 +6,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { modelUrl } from "./hero-products.js";
 import { ensureModelBytes, getCachedModelBytes } from "./hero-model-preload.js";
+import { HERO_GPU_CACHE_MAX, HERO_TARGET_FPS } from "./hero-config.js";
 import { isMobilePerfMode } from "./device.js";
 
 const FIRST_HERO_SLUG = "helmet";
@@ -78,8 +79,8 @@ function releaseCachedModel(slug, cache, availableSlugs) {
   availableSlugs.delete(slug);
 }
 
-/** Max processed models in GPU memory on mobile (prevents Safari tab kill). */
-const MOBILE_GPU_CACHE_MAX = 2;
+/** Max processed models in GPU memory (current + next). */
+const GPU_CACHE_MAX = HERO_GPU_CACHE_MAX;
 
 function nextSlugInList(slug, list) {
   const i = list.indexOf(slug);
@@ -92,7 +93,7 @@ function trimGpuCache(cache, availableSlugs, keepSlugs) {
   for (const slug of [...cache.keys()]) {
     if (!keep.has(slug)) releaseCachedModel(slug, cache, availableSlugs);
   }
-  while (cache.size > MOBILE_GPU_CACHE_MAX) {
+  while (cache.size > GPU_CACHE_MAX) {
     const drop = [...cache.keys()].find((k) => !keep.has(k));
     if (!drop) break;
     releaseCachedModel(drop, cache, availableSlugs);
@@ -599,17 +600,17 @@ export function initHeroHelmet(canvas, products = []) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     alpha: true,
-    antialias: !mobilePerf,
+    antialias: false,
     powerPreference: "high-performance",
     stencil: false,
     depth: true,
   });
   function getRendererDpr() {
     const dpr = window.devicePixelRatio || 1;
-    return Math.min(dpr, mobilePerf ? 1.5 : 1.85);
+    return Math.min(dpr, mobilePerf ? 1.25 : 1.5);
   }
 
-  renderer.setPixelRatio(getRendererDpr(false));
+  renderer.setPixelRatio(getRendererDpr());
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
@@ -620,24 +621,16 @@ export function initHeroHelmet(canvas, products = []) {
   pmrem.dispose();
   scene.environment = envMap;
 
-  scene.add(new THREE.HemisphereLight(0xdbeafe, 0x0f172a, 0.9));
-  scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+  scene.add(new THREE.HemisphereLight(0xdbeafe, 0x0f172a, 0.85));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.2));
 
-  const key = new THREE.DirectionalLight(0xffffff, 2.2);
+  const key = new THREE.DirectionalLight(0xffffff, 1.85);
   key.position.set(6, 10, 7);
   scene.add(key);
 
-  const fill = new THREE.DirectionalLight(0x5eead4, 1.1);
-  fill.position.set(-7, 3, 5);
+  const fill = new THREE.DirectionalLight(0x5eead4, 0.75);
+  fill.position.set(-6, 2, 5);
   scene.add(fill);
-
-  const rim = new THREE.DirectionalLight(0x7dd3fc, 1.35);
-  rim.position.set(2, 5, -9);
-  scene.add(rim);
-
-  const accent = new THREE.PointLight(0x2dd4bf, 2.5, 12);
-  accent.position.set(-2, 1, 3);
-  scene.add(accent);
 
   const modelPivot = new THREE.Group();
   scene.add(modelPivot);
@@ -730,7 +723,7 @@ export function initHeroHelmet(canvas, products = []) {
   async function processGltf(gltf, slug) {
     stripLikelyBackground(gltf.scene);
     const model = centerAndScale(gltf.scene.clone(true));
-    applyMaterialsForSlug(model, slug, envMap, mobilePerf);
+    applyMaterialsForSlug(model, slug, envMap, slug !== "helmet");
     setModelOpacity(model, 1);
     model.userData.slug = slug;
 
@@ -765,13 +758,7 @@ export function initHeroHelmet(canvas, products = []) {
     if (inflight.has(slug)) return inflight.get(slug);
 
     const task = (async () => {
-      if (mobilePerf) {
-        trimGpuCache(cache, availableSlugs, [
-          slug,
-          nextSlugInList(slug, slugs),
-          currentSlug,
-        ]);
-      }
+      trimGpuCache(cache, availableSlugs, [slug, nextSlugInList(slug, slugs), currentSlug]);
 
       if (slug === FIRST_HERO_SLUG) {
         try {
@@ -810,38 +797,8 @@ export function initHeroHelmet(canvas, products = []) {
     list.forEach((slug, i) => {
       window.setTimeout(() => {
         ensureModelBytes(slug).catch(() => {});
-        if (cache.has(slug) || inflight.has(slug)) return;
-        loadModel(slug).catch(() => {});
-      }, 80 + i * 120);
+      }, 200 + i * 350);
     });
-  }
-
-  function warmAllModels() {
-    if (mobilePerf) {
-      slugs.forEach((slug) => ensureModelBytes(slug).catch(() => {}));
-      const firstNext = nextSlugInList(firstSlug, slugs);
-      ensureModelBytes(firstNext)
-        .then(() => loadModel(firstNext).catch(() => {}))
-        .catch(() => {});
-      return;
-    }
-
-    const pending = slugs.filter((s) => !cache.has(s) && !inflight.has(s));
-    let cursor = 0;
-    const workers = 3;
-
-    const runWorker = async () => {
-      while (cursor < pending.length) {
-        const slug = pending[cursor++];
-        try {
-          await loadModel(slug);
-        } catch {
-          /* skip missing/broken assets */
-        }
-      }
-    };
-
-    for (let w = 0; w < workers; w++) void runWorker();
   }
 
   function prefetchNextGpu(slug) {
@@ -873,7 +830,7 @@ export function initHeroHelmet(canvas, products = []) {
       onModelReady?.();
       onWordReveal?.();
       prefetchNextGpu(slug);
-      if (mobilePerf) trimGpuCache(cache, availableSlugs, [slug, nextSlugInList(slug, slugs)]);
+      trimGpuCache(cache, availableSlugs, [slug, nextSlugInList(slug, slugs)]);
       return;
     }
 
@@ -895,7 +852,7 @@ export function initHeroHelmet(canvas, products = []) {
           onModelReady?.();
           currentModel = next;
           prefetchNextGpu(slug);
-          if (mobilePerf) trimGpuCache(cache, availableSlugs, [slug, nextKeep]);
+          trimGpuCache(cache, availableSlugs, [slug, nextKeep]);
           resolve();
           return;
         }
@@ -907,10 +864,8 @@ export function initHeroHelmet(canvas, products = []) {
 
         if (prev) {
           hideModel(prev);
-          if (mobilePerf) {
-            const prevSlug = prev.userData.slug;
-            if (prevSlug && prevSlug !== slug && prevSlug !== nextKeep) purgeModel(prev);
-          }
+          const prevSlug = prev.userData.slug;
+          if (prevSlug && prevSlug !== slug && prevSlug !== nextKeep) purgeModel(prev);
         }
 
         setModelOpacity(next, 0);
@@ -922,7 +877,7 @@ export function initHeroHelmet(canvas, products = []) {
         setModelOpacity(next, 1);
         currentModel = next;
         prefetchNextGpu(slug);
-        if (mobilePerf) trimGpuCache(cache, availableSlugs, [slug, nextKeep]);
+        trimGpuCache(cache, availableSlugs, [slug, nextKeep]);
         resolve();
       });
     });
@@ -949,12 +904,12 @@ export function initHeroHelmet(canvas, products = []) {
   }
 
   hideStageMessage(container);
-  warmAllModels();
 
   const ready = loadModel(firstSlug)
     .then(() => showProduct(firstSlug))
     .then(() => {
       hideStageMessage(container);
+      if (slugs.length > 1) prefetchNextGpu(firstSlug);
       return api;
     })
     .catch(() => {
@@ -997,7 +952,7 @@ export function initHeroHelmet(canvas, products = []) {
     const slug = currentSlug || firstSlug;
     try {
       await showProduct(slug);
-      if (mobilePerf) prefetchNextGpu(slug);
+      prefetchNextGpu(slug);
     } catch {
       await showProduct(firstSlug).catch(() => {});
     } finally {
@@ -1019,7 +974,7 @@ export function initHeroHelmet(canvas, products = []) {
   canvas.addEventListener(
     "webglcontextrestored",
     () => {
-      recoverContext().then(() => animate());
+      recoverContext().then(() => startRenderLoop());
     },
     false
   );
@@ -1027,6 +982,8 @@ export function initHeroHelmet(canvas, products = []) {
   const visibilityIo = new IntersectionObserver(
     ([entry]) => {
       heroVisible = entry.isIntersecting;
+      if (heroVisible && pageVisible && !contextLost) startRenderLoop();
+      else stopRenderLoop();
     },
     { threshold: 0.05, rootMargin: "40px" }
   );
@@ -1034,18 +991,41 @@ export function initHeroHelmet(canvas, products = []) {
 
   document.addEventListener("visibilitychange", () => {
     pageVisible = document.visibilityState !== "hidden";
+    if (heroVisible && pageVisible && !contextLost) startRenderLoop();
+    else stopRenderLoop();
   });
 
-  function animate() {
-    raf = requestAnimationFrame(animate);
+  const frameBudgetMs = 1000 / HERO_TARGET_FPS;
+  let lastFrameTime = 0;
+  let renderLoopActive = false;
+
+  function tick(now) {
+    if (!renderLoopActive) return;
+    raf = requestAnimationFrame(tick);
+
     if (!heroVisible || !pageVisible || contextLost) return;
+
+    if (now - lastFrameTime < frameBudgetMs) return;
+    lastFrameTime = now;
 
     controls.update();
     modelPivot.position.y = Math.sin(clock.getElapsedTime() * 1.05) * 0.03;
     renderer.render(scene, camera);
   }
 
-  animate();
+  function startRenderLoop() {
+    if (renderLoopActive || contextLost) return;
+    renderLoopActive = true;
+    lastFrameTime = 0;
+    raf = requestAnimationFrame(tick);
+  }
+
+  function stopRenderLoop() {
+    renderLoopActive = false;
+    cancelAnimationFrame(raf);
+  }
+
+  startRenderLoop();
 
   const api = {
     showProduct,
