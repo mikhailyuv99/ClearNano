@@ -31,7 +31,7 @@ export function initHeroRotator(api, products) {
   }
 
   function setCanvasLabel(word) {
-    const label = `3D ${word} preview`;
+    const label = `Clear Nano cleaning machine — ${word}`;
     if (canvas) canvas.setAttribute("aria-label", label);
     if (viewer) viewer.setAttribute("alt", label);
   }

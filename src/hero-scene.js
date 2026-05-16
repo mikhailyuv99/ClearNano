@@ -1,9 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { createProceduralHelmet } from "./procedural-helmet.js";
+import { createCleaningMachine } from "./procedural-machine.js";
 import { isMobilePerfMode } from "./device.js";
 
-const TARGET_SIZE = 2.35;
+const TARGET_SIZE = 2.5;
 
 function fitModel(model) {
   const box = new THREE.Box3().setFromObject(model);
@@ -20,9 +20,9 @@ function frameCamera(camera, controls, object) {
   const center = box.getCenter(new THREE.Vector3());
   const maxDim = Math.max(size.x, size.y, size.z, 0.001);
   const fovRad = (camera.fov * Math.PI) / 180;
-  const pad = window.innerWidth <= 959 ? 1.95 : 1.55;
+  const pad = window.innerWidth <= 959 ? 2.05 : 1.65;
   const distance = (maxDim / 2 / Math.tan(fovRad / 2)) * pad;
-  camera.position.set(center.x + distance * 0.1, center.y + size.y * 0.05, center.z + distance);
+  camera.position.set(center.x + distance * 0.35, center.y + size.y * 0.02, center.z + distance * 0.85);
   camera.near = 0.05;
   camera.far = 200;
   camera.updateProjectionMatrix();
@@ -32,7 +32,7 @@ function frameCamera(camera, controls, object) {
   controls.update();
 }
 
-/** Minimal hero viewer — procedural helmet only, no GLB. */
+/** Hero 3D — procedural cleaning kiosk, no GLB. */
 export function initHeroScene(canvas) {
   if (!canvas) return null;
 
@@ -52,29 +52,32 @@ export function initHeroScene(canvas) {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.22;
 
-  scene.add(new THREE.HemisphereLight(0xdbeafe, 0x0f172a, 0.9));
-  scene.add(new THREE.AmbientLight(0xffffff, 0.25));
-  const key = new THREE.DirectionalLight(0xffffff, 1.6);
-  key.position.set(5, 9, 7);
+  scene.add(new THREE.HemisphereLight(0xdbeafe, 0x0f172a, 0.85));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+  const key = new THREE.DirectionalLight(0xffffff, 1.5);
+  key.position.set(5, 10, 8);
   scene.add(key);
-  const fill = new THREE.DirectionalLight(0x5eead4, 0.65);
-  fill.position.set(-5, 2, 5);
+  const fill = new THREE.DirectionalLight(0x5eead4, 0.55);
+  fill.position.set(-6, 3, 4);
   scene.add(fill);
+  const rim = new THREE.DirectionalLight(0x88ccff, 0.4);
+  rim.position.set(0, 2, -8);
+  scene.add(rim);
 
-  const helmet = createProceduralHelmet(null, { lite });
-  fitModel(helmet);
-  scene.add(helmet);
+  const machine = createCleaningMachine({ lite });
+  fitModel(machine);
+  scene.add(machine);
 
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
   controls.dampingFactor = 0.06;
   controls.enablePan = false;
   controls.enableZoom = false;
-  controls.minPolarAngle = Math.PI * 0.22;
-  controls.maxPolarAngle = Math.PI * 0.78;
+  controls.minPolarAngle = Math.PI * 0.18;
+  controls.maxPolarAngle = Math.PI * 0.82;
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 1.15;
+    controls.autoRotateSpeed = 0.9;
   }
   controls.addEventListener("start", () => {
     controls.autoRotate = false;
@@ -94,7 +97,7 @@ export function initHeroScene(canvas) {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    frameCamera(camera, controls, helmet);
+    frameCamera(camera, controls, machine);
   }
 
   resize();
@@ -106,7 +109,7 @@ export function initHeroScene(canvas) {
   function tick() {
     raf = requestAnimationFrame(tick);
     controls.update();
-    helmet.position.y = Math.sin(clock.getElapsedTime() * 1.05) * 0.03;
+    machine.rotation.y = 0.22 + Math.sin(clock.getElapsedTime() * 0.55) * 0.08;
     renderer.render(scene, camera);
   }
   tick();
@@ -125,7 +128,7 @@ export function initHeroScene(canvas) {
       cancelAnimationFrame(raf);
       ro.disconnect();
       renderer.dispose();
-      helmet.traverse((c) => {
+      machine.traverse((c) => {
         c.geometry?.dispose?.();
         if (c.material) {
           const mats = Array.isArray(c.material) ? c.material : [c.material];
