@@ -1,3 +1,8 @@
+import "./page-fade.js";
+import { initHeroHelmet } from "./hero-helmet.js";
+import { initHeroRotator } from "./hero-rotator.js";
+import { HERO_ROTATION } from "./hero-products.js";
+
 const PRICE = 20000;
 const DAYS = 30;
 const SHARE = 0.25;
@@ -70,12 +75,8 @@ if (location.hash === "#partner" || location.hash === "#business") {
 
 const helmetCanvas = document.getElementById("hero-helmet-canvas");
 if (helmetCanvas) {
-  Promise.all([import("./hero-helmet.js"), import("./hero-rotator.js"), import("./hero-products.js")]).then(
-    ([{ initHeroHelmet }, { initHeroRotator }, { HERO_ROTATION }]) => {
-      const api = initHeroHelmet(helmetCanvas, HERO_ROTATION);
-      api?.whenReady?.().then(() => {
-        initHeroRotator(api, HERO_ROTATION);
-      });
-    }
-  );
+  const api = initHeroHelmet(helmetCanvas, HERO_ROTATION);
+  api?.whenReady?.().then(() => {
+    initHeroRotator(api, HERO_ROTATION);
+  });
 }
