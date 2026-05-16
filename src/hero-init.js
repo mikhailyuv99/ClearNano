@@ -10,33 +10,37 @@ export function initHeroExperience() {
   canvas.hidden = false;
 
   void (async () => {
-    const [{ initHeroHelmet }, { initHeroRotator }] = await Promise.all([
-      heroHelmetModuleReady,
-      heroRotatorModuleReady,
-    ]);
+    try {
+      const [{ initHeroHelmet }, { initHeroRotator }] = await Promise.all([
+        heroHelmetModuleReady,
+        heroRotatorModuleReady,
+      ]);
 
-    if (HERO_SINGLE_MODEL) {
-      const api = initHeroHelmet(canvas, [{ slug: HERO_FIRST_SLUG, word: "helmet" }]);
+      if (HERO_SINGLE_MODEL) {
+        const api = initHeroHelmet(canvas, [{ slug: HERO_FIRST_SLUG, word: "helmet" }]);
+        if (!api) return;
+
+        const wordOnlyApi = {
+          showProduct(_slug, options = {}) {
+            options.onTransitionStart?.();
+            options.onWordReveal?.();
+            return Promise.resolve();
+          },
+          isHealthy: () => api.isHealthy(),
+          waitForHealthy: (...args) => api.waitForHealthy?.(...args),
+          whenReady: () => api.whenReady(),
+        };
+
+        initHeroRotator(wordOnlyApi, HERO_ROTATION);
+        return;
+      }
+
+      const api = initHeroHelmet(canvas, HERO_ROTATION);
       if (!api) return;
 
-      const wordOnlyApi = {
-        showProduct(_slug, options = {}) {
-          options.onTransitionStart?.();
-          options.onWordReveal?.();
-          return Promise.resolve();
-        },
-        isHealthy: () => api.isHealthy(),
-        waitForHealthy: (...args) => api.waitForHealthy?.(...args),
-        whenReady: () => api.whenReady(),
-      };
-
-      initHeroRotator(wordOnlyApi, HERO_ROTATION);
-      return;
+      api.whenReady?.().then(() => initHeroRotator(api, HERO_ROTATION));
+    } catch (err) {
+      console.error("[Clear Nano] Hero init failed:", err);
     }
-
-    const api = initHeroHelmet(canvas, HERO_ROTATION);
-    if (!api) return;
-
-    api.whenReady?.().then(() => initHeroRotator(api, HERO_ROTATION));
   })();
 }

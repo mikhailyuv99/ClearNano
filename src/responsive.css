@@ -25,20 +25,14 @@
 /* Hero: 3D above CTAs on mobile, tighter vertical rhythm */
 @media (max-width: 959px) {
   .hero {
-    min-height: 0;
-    padding-bottom: 0;
+    padding-top: calc(var(--header-h) + 0.5rem);
   }
 
   .hero-grid {
     display: flex;
     flex-direction: column;
-    gap: 0.1rem;
-    flex: none;
-    padding-bottom: 1rem;
-  }
-
-  .stats-strip {
-    margin-top: 0;
+    gap: 0.35rem;
+    padding-bottom: 0.75rem;
   }
 
   .hero-copy {

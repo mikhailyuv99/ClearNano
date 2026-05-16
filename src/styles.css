@@ -503,9 +503,8 @@ h4 {
 /* Hero */
 .hero {
   position: relative;
-  padding: calc(var(--header-h) + 2.5rem) 0 0;
-  min-height: 100vh;
-  min-height: 100dvh;
+  padding: calc(var(--header-h) + 0.65rem) 0 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: visible;
@@ -519,10 +518,10 @@ h4 {
   position: relative;
   z-index: 1;
   display: grid;
-  gap: 3rem;
+  gap: 1.75rem;
   align-items: center;
-  flex: 1;
-  padding-bottom: 3rem;
+  flex: none;
+  padding-bottom: 1rem;
   overflow: visible;
 }
 
@@ -718,15 +717,15 @@ h4 {
   justify-content: center;
   align-items: center;
   overflow: visible;
-  min-height: min(70vh, 620px);
-  padding: 1rem 0 2rem;
+  min-height: 0;
+  padding: 0;
 }
 
 .hero-helmet-scene {
   position: relative;
-  width: min(100%, 620px);
-  height: min(72vh, 620px);
-  min-height: 440px;
+  width: min(100%, 520px);
+  height: min(52vh, 480px);
+  min-height: 280px;
   margin: 0 auto;
   overflow: visible;
   background: transparent;
@@ -800,6 +799,10 @@ h4 {
 
 .hero-helmet-scene:has(canvas) .hero-helmet-status[hidden] {
   display: none;
+}
+
+.hero-helmet-scene:has(canvas) .hero-helmet-status--error:not([hidden]) {
+  display: flex;
 }
 
 .hero-card {
@@ -897,7 +900,7 @@ h4 {
 .stats-strip {
   position: relative;
   z-index: 1;
-  margin-top: auto;
+  margin-top: 0;
   background: var(--glass-bg-solid);
   backdrop-filter: blur(28px) saturate(1.4);
   -webkit-backdrop-filter: blur(28px) saturate(1.4);
@@ -939,7 +942,14 @@ h4 {
 @media (min-width: 960px) {
   .hero-grid {
     grid-template-columns: 1.05fr 0.95fr;
-    gap: 2rem;
+    gap: 1.5rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .hero-helmet-scene {
+    width: min(100%, 480px);
+    height: min(48vh, 440px);
+    min-height: 300px;
   }
 }
 

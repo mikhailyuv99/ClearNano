@@ -13,7 +13,7 @@ export function ensureModelBytes(slug) {
   if (bytes.has(slug)) return Promise.resolve(bytes.get(slug));
   if (inflight.has(slug)) return inflight.get(slug);
 
-  const task = fetch(modelUrl(slug), { cache: "force-cache", priority: "high" })
+  const task = fetch(modelUrl(slug), { cache: "force-cache" })
     .then((res) => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res.arrayBuffer();

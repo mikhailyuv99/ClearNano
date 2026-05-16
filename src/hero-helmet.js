@@ -5,7 +5,7 @@ import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { modelUrl } from "./hero-products.js";
-import { ensureModelBytes, getCachedModelBytes } from "./hero-model-preload.js";
+import { ensureModelBytes } from "./hero-model-preload.js";
 import { HERO_GPU_CACHE_MAX, HERO_TARGET_FPS } from "./hero-config.js";
 import { isMobilePerfMode } from "./device.js";
 
@@ -17,19 +17,13 @@ sharedDraco.preload();
 
 const meshoptReady = MeshoptDecoder.ready;
 
-/** Parse helmet from primed bytes the moment this module loads. */
+/** Network load via GLTFLoader (parse-from-bytes breaks Draco/meshopt assets). */
 function preloadHelmetGltf() {
-  const bytesReady = ensureModelBytes(FIRST_HERO_SLUG);
-
-  return meshoptReady.then(async () => {
+  return meshoptReady.then(() => {
     const loader = createLoader();
     loader.setMeshoptDecoder(MeshoptDecoder);
-
-    const cached = getCachedModelBytes(FIRST_HERO_SLUG);
-    const bytes = cached || (await bytesReady);
-
     return new Promise((resolve, reject) => {
-      loader.parse(bytes, modelUrl(FIRST_HERO_SLUG), resolve, reject);
+      loader.load(modelUrl(FIRST_HERO_SLUG), resolve, undefined, reject);
     });
   });
 }
@@ -714,22 +708,20 @@ export function initHeroHelmet(canvas, products = []) {
 
   async function loadModelOnce(slug) {
     await attachMeshoptIfNeeded();
-
-    const cachedBytes = getCachedModelBytes(slug);
-    if (cachedBytes) {
-      return new Promise((resolve, reject) => {
-        loader.parse(cachedBytes, modelUrl(slug), resolve, reject);
-      });
-    }
-
-    const bytes = await ensureModelBytes(slug);
     return new Promise((resolve, reject) => {
-      loader.parse(bytes, modelUrl(slug), resolve, reject);
+      loader.load(modelUrl(slug), resolve, undefined, reject);
     });
   }
 
   async function processGltf(gltf, slug) {
-    if (!envMap) await envMapReady;
+    if (!envMap) {
+      try {
+        envMap = await envMapReady;
+        scene.environment = envMap;
+      } catch {
+        /* show model even if IBL fails */
+      }
+    }
 
     stripLikelyBackground(gltf.scene);
     const model = centerAndScale(gltf.scene.clone(true));
@@ -838,6 +830,10 @@ export function initHeroHelmet(canvas, products = []) {
       currentModel = next;
       hideStageMessage(container);
       document.body.classList.add("is-page-ready");
+      resize();
+      controls.update();
+      renderer.render(scene, camera);
+      startRenderLoop();
       onModelReady?.();
       onWordReveal?.();
       prefetchNextGpu(slug);
@@ -923,8 +919,10 @@ export function initHeroHelmet(canvas, products = []) {
       if (slugs.length > 1) prefetchNextGpu(firstSlug);
       return api;
     })
-    .catch(() => {
-      setStageMessage(container, "error", "Could not load 3D model. Check /public/models/.");
+    .catch((err) => {
+      console.error("[Clear Nano] Hero model failed:", err);
+      setStageMessage(container, "error", "Could not load 3D model. Check /public/models/helmet.glb");
+      startRenderLoop();
       return api;
     });
 
@@ -993,8 +991,6 @@ export function initHeroHelmet(canvas, products = []) {
   const visibilityIo = new IntersectionObserver(
     ([entry]) => {
       heroVisible = entry.isIntersecting;
-      if (heroVisible && pageVisible && !contextLost) startRenderLoop();
-      else stopRenderLoop();
     },
     { threshold: 0.05, rootMargin: "40px" }
   );
@@ -1002,8 +998,6 @@ export function initHeroHelmet(canvas, products = []) {
 
   document.addEventListener("visibilitychange", () => {
     pageVisible = document.visibilityState !== "hidden";
-    if (heroVisible && pageVisible && !contextLost) startRenderLoop();
-    else stopRenderLoop();
   });
 
   const frameBudgetMs = 1000 / HERO_TARGET_FPS;
@@ -1037,6 +1031,7 @@ export function initHeroHelmet(canvas, products = []) {
   }
 
   startRenderLoop();
+  requestAnimationFrame(() => resize());
 
   const api = {
     showProduct,
