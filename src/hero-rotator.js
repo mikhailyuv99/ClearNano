@@ -86,8 +86,18 @@ export function initHeroRotator(api, products) {
   const list = products;
   let index = 0;
 
+  async function ensureGpuReady() {
+    if (!api.isHealthy || api.isHealthy()) return true;
+    try {
+      await api.waitForHealthy?.();
+      return api.isHealthy?.() ?? true;
+    } catch {
+      return false;
+    }
+  }
+
   async function advance() {
-    if (api.isHealthy && !api.isHealthy()) return;
+    if (!(await ensureGpuReady())) return;
 
     let tries = 0;
     while (tries < list.length && !cancelled) {
