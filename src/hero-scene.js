@@ -51,7 +51,7 @@ export function initHeroScene(canvas) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     alpha: true,
-    antialias: !lite,
+    antialias: true,
     powerPreference: "high-performance",
   });
   const dpr = Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 2);
