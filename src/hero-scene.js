@@ -54,9 +54,8 @@ export function initHeroScene(canvas) {
     antialias: true,
     powerPreference: "high-performance",
   });
-  const fullDpr = Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 2);
-  const scrollDpr = lite ? 1 : fullDpr;
-  renderer.setPixelRatio(fullDpr);
+  const dpr = Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 2);
+  renderer.setPixelRatio(dpr);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.22;
@@ -87,6 +86,7 @@ export function initHeroScene(canvas) {
   controls.maxPolarAngle = Math.PI * 0.82;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const spinSpeed = reducedMotion ? 0 : 0.65;
+  const spinStartSec = performance.now() * 0.001;
 
   let machine = null;
   const whenReady = loadClearNanoLogo()
@@ -136,9 +136,6 @@ export function initHeroScene(canvas) {
   );
   viewObserver.observe(canvas.parentElement || canvas);
 
-  let scrollEndId = 0;
-  const clock = new THREE.Clock();
-
   function isMenuOpen() {
     return document.documentElement.classList.contains("menu-open");
   }
@@ -147,23 +144,11 @@ export function initHeroScene(canvas) {
     return inView && !document.hidden && !isMenuOpen();
   }
 
-  function setScrollDpr(active) {
-    if (!lite) return;
-    renderer.setPixelRatio(active ? scrollDpr : fullDpr);
-  }
-
-  function markScrolling() {
-    if (!lite) return;
-    setScrollDpr(true);
-    window.clearTimeout(scrollEndId);
-    scrollEndId = window.setTimeout(() => setScrollDpr(false), 180);
-  }
-
   function renderFrame() {
-    const dt = Math.min(clock.getDelta(), 0.05);
     controls.update();
     if (machine && spinSpeed > 0 && machine.userData.userSpinning !== false) {
-      machine.rotation.y += dt * spinSpeed;
+      const elapsed = performance.now() * 0.001 - spinStartSec;
+      machine.rotation.y = elapsed * spinSpeed;
     }
     renderer.render(scene, camera);
   }
@@ -172,11 +157,6 @@ export function initHeroScene(canvas) {
     if (!document.hidden && shouldRender()) renderFrame();
   }
 
-  window.addEventListener("scroll", markScrolling, { passive: true });
-  window.addEventListener("app-scroll", markScrolling, { passive: true });
-  if (lite) {
-    window.addEventListener("touchmove", markScrolling, { passive: true, capture: true });
-  }
   document.addEventListener("visibilitychange", onVisibility);
 
   renderer.setAnimationLoop(() => {
@@ -196,12 +176,6 @@ export function initHeroScene(canvas) {
     waitForHealthy: () => Promise.resolve(),
     dispose() {
       renderer.setAnimationLoop(null);
-      window.clearTimeout(scrollEndId);
-      window.removeEventListener("scroll", markScrolling);
-      window.removeEventListener("app-scroll", markScrolling);
-      if (lite) {
-        window.removeEventListener("touchmove", markScrolling, { capture: true });
-      }
       document.removeEventListener("visibilitychange", onVisibility);
       ro.disconnect();
       viewObserver.disconnect();

@@ -126,14 +126,18 @@ html {
   backface-visibility: hidden;
 }
 
-body > :not(.page-bg-stack):not(.site-header) {
+body > :not(.page-bg-stack):not(.site-header):not(.mobile-nav) {
   position: relative;
   z-index: 1;
 }
 
+/* Must beat body child rule ù was trapped under #main (invisible overlay) */
+.mobile-nav {
+  z-index: 9990 !important;
+}
+
 .site-header {
-  z-index: 200;
-  isolation: isolate;
+  z-index: 10000;
 }
 
 .page-bg {
@@ -324,7 +328,7 @@ h4 {
   position: fixed;
   inset: 0 auto auto 0;
   width: 100%;
-  z-index: 200;
+  z-index: 10000;
   margin: 0;
   padding: 0;
   height: var(--header-h);
@@ -486,7 +490,6 @@ h4 {
   display: none;
   position: fixed;
   inset: 0;
-  z-index: 199;
   pointer-events: none;
 }
 
@@ -500,13 +503,20 @@ h4 {
   position: absolute;
   inset: 0;
   z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
   margin: 0;
   padding: 0;
   border: 0;
   cursor: pointer;
-  background: rgba(5, 8, 16, 0.55);
-  backdrop-filter: blur(40px) saturate(1.2);
-  -webkit-backdrop-filter: blur(40px) saturate(1.2);
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: rgba(5, 8, 16, 0.72);
+  background-image: linear-gradient(180deg, rgba(5, 8, 16, 0.5), rgba(5, 8, 16, 0.82));
+  -webkit-backdrop-filter: blur(48px) saturate(1.25);
+  backdrop-filter: blur(48px) saturate(1.25);
+  transform: translateZ(0);
 }
 
 .mobile-nav__panel {

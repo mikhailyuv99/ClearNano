@@ -137,13 +137,9 @@
     z-index: 11;
   }
 
-  .mobile-nav.is-open {
-    z-index: 199;
-  }
-
   html.menu-open .site-header,
   body.menu-open .site-header {
-    z-index: 201;
+    z-index: 10001;
   }
 
   body.menu-open .site-header .header-shell {
@@ -291,8 +287,9 @@
 
   /* Full-screen menu overlay keeps heavy page blur */
   .mobile-nav__backdrop {
-    backdrop-filter: blur(40px) saturate(1.2) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(1.2) !important;
+    background-color: rgba(5, 8, 16, 0.78) !important;
+    -webkit-backdrop-filter: blur(48px) saturate(1.25) !important;
+    backdrop-filter: blur(48px) saturate(1.25) !important;
   }
 
   .hero-helmet-scene canvas {
