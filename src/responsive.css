@@ -24,11 +24,21 @@
 
 /* Hero: 3D above CTAs on mobile, tighter vertical rhythm */
 @media (max-width: 959px) {
+  .hero {
+    min-height: 0;
+    padding-bottom: 0;
+  }
+
   .hero-grid {
     display: flex;
     flex-direction: column;
     gap: 0.1rem;
-    padding-bottom: 1.25rem;
+    flex: none;
+    padding-bottom: 1rem;
+  }
+
+  .stats-strip {
+    margin-top: 0;
   }
 
   .hero-copy {

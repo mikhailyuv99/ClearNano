@@ -607,14 +607,14 @@ export function initHeroHelmet(canvas, products = []) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     alpha: true,
-    antialias: false,
+    antialias: true,
     powerPreference: "high-performance",
     stencil: false,
     depth: true,
   });
   function getRendererDpr() {
     const dpr = window.devicePixelRatio || 1;
-    return Math.min(dpr, mobilePerf ? 1.25 : 1.5);
+    return Math.min(dpr, 2);
   }
 
   renderer.setPixelRatio(getRendererDpr());
