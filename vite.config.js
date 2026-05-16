@@ -11,6 +11,12 @@ export default defineConfig({
         terms: "terms.html",
         privacy: "privacy.html",
       },
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules/three")) return "vendor-three";
+          if (id.includes("node_modules/@google/model-viewer")) return "vendor-model-viewer";
+        },
+      },
     },
   },
 });

@@ -1,7 +1,5 @@
 import "./page-fade.js";
-import { initHeroHelmet } from "./hero-helmet.js";
-import { initHeroRotator } from "./hero-rotator.js";
-import { HERO_ROTATION } from "./hero-products.js";
+import { initHeroExperience } from "./hero-init.js";
 
 const PRICE = 20000;
 const DAYS = 30;
@@ -73,10 +71,4 @@ if (location.hash === "#partner" || location.hash === "#business") {
   document.getElementById("partner")?.scrollIntoView({ behavior: "smooth" });
 }
 
-const helmetCanvas = document.getElementById("hero-helmet-canvas");
-if (helmetCanvas) {
-  const api = initHeroHelmet(helmetCanvas, HERO_ROTATION);
-  api?.whenReady?.().then(() => {
-    initHeroRotator(api, HERO_ROTATION);
-  });
-}
+void initHeroExperience();
