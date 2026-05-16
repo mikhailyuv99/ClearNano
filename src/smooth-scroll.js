@@ -36,6 +36,7 @@ export function initSmoothScroll(onScroll) {
     requestAnimationFrame(() => {
       scrollScheduled = false;
       onScroll?.();
+      window.dispatchEvent(new CustomEvent("app-scroll"));
     });
   };
 

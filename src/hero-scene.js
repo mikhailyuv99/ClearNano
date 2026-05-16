@@ -125,27 +125,67 @@ export function initHeroScene(canvas) {
   const ro = new ResizeObserver(resize);
   ro.observe(canvas.parentElement);
 
-  let inView = true;
+  let inView = false;
   const viewObserver = new IntersectionObserver(
     ([entry]) => {
-      inView = entry.isIntersecting;
+      inView = entry.isIntersecting && entry.intersectionRatio >= 0.12;
     },
-    { root: null, threshold: 0.08 }
+    { root: null, threshold: [0, 0.12, 0.25, 0.5] }
   );
-  viewObserver.observe(canvas);
+  viewObserver.observe(canvas.parentElement || canvas);
 
+  let scrolling = false;
+  let scrollEndId = 0;
+  const targetFps = lite ? 30 : 45;
+  const minFrameMs = 1000 / targetFps;
   const clock = new THREE.Clock();
   let raf = 0;
-  function tick() {
-    raf = requestAnimationFrame(tick);
-    if (!inView) return;
+  let lastFrame = 0;
+
+  function shouldRender() {
+    return inView && !scrolling && !document.hidden;
+  }
+
+  function renderFrame() {
+    const dt = Math.min(clock.getDelta(), 0.05);
     controls.update();
     if (machine && spinSpeed > 0 && machine.userData.userSpinning !== false) {
-      machine.rotation.y += clock.getDelta() * spinSpeed;
+      machine.rotation.y += dt * spinSpeed;
     }
     renderer.render(scene, camera);
   }
-  tick();
+
+  function onScroll() {
+    scrolling = true;
+    window.clearTimeout(scrollEndId);
+    scrollEndId = window.setTimeout(() => {
+      scrolling = false;
+      if (shouldRender()) {
+        lastFrame = 0;
+        renderFrame();
+      }
+    }, 150);
+  }
+
+  function onVisibility() {
+    if (!document.hidden && shouldRender()) {
+      lastFrame = 0;
+      renderFrame();
+    }
+  }
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("app-scroll", onScroll, { passive: true });
+  document.addEventListener("visibilitychange", onVisibility);
+
+  function tick(now) {
+    raf = requestAnimationFrame(tick);
+    if (!shouldRender()) return;
+    if (lastFrame && now - lastFrame < minFrameMs) return;
+    lastFrame = now;
+    renderFrame();
+  }
+  tick(performance.now());
 
   return {
     whenReady,
@@ -159,6 +199,10 @@ export function initHeroScene(canvas) {
     waitForHealthy: () => Promise.resolve(),
     dispose() {
       cancelAnimationFrame(raf);
+      window.clearTimeout(scrollEndId);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("app-scroll", onScroll);
+      document.removeEventListener("visibilitychange", onVisibility);
       ro.disconnect();
       viewObserver.disconnect();
       renderer.dispose();
