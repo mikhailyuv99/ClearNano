@@ -133,6 +133,7 @@ body > :not(.page-bg-stack):not(.site-header) {
 
 .site-header {
   z-index: 200;
+  isolation: isolate;
 }
 
 .page-bg {
@@ -449,7 +450,8 @@ h4 {
   cursor: pointer;
   flex-shrink: 0;
   position: relative;
-  z-index: 3;
+  z-index: 12;
+  overflow: visible;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -483,17 +485,20 @@ h4 {
 .mobile-nav {
   display: none;
   position: fixed;
-  inset: 0;
-  z-index: 199;
+  top: var(--header-h);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 150;
   flex-direction: column;
   gap: 0.4rem;
-  padding: calc(var(--header-h) + 0.75rem) 1.25rem max(1.5rem, env(safe-area-inset-bottom, 0px));
+  padding: 1rem 1.25rem max(1.5rem, env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background: var(--glass-dark-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border-top: none;
+  border-top: 1px solid var(--glass-border);
 }
 
 .mobile-nav.is-open {
@@ -788,7 +793,7 @@ h4 {
   box-shadow: none;
   background: transparent;
   cursor: grab;
-  touch-action: none;
+  touch-action: pan-y;
 }
 
 .hero-helmet-scene canvas:active {

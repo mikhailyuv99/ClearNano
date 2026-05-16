@@ -76,13 +76,6 @@
     overflow: visible;
   }
 
-  /* Let page scroll through hero 3D — touch-action:none was blocking scroll + janking WebGL */
-  .hero-helmet-scene canvas {
-    pointer-events: none;
-    touch-action: pan-y;
-    cursor: default;
-  }
-
   .hero-actions {
     flex-direction: column;
     align-items: stretch;
@@ -127,38 +120,26 @@
     height: var(--header-h);
     box-sizing: border-box;
     overflow: visible;
-    pointer-events: none;
   }
 
-  .header-shell,
-  .header-inner,
-  .logo {
-    pointer-events: auto;
+  .header-shell {
+    position: relative;
+    z-index: 2;
   }
 
-  .header-inner {
-    padding-right: 3.5rem;
-  }
-
-  /* Fixed above drawer — never clipped by header height / iOS overflow bugs */
-  .menu-toggle {
-    position: fixed;
-    top: calc(env(safe-area-inset-top, 0px) + 14px);
-    right: max(1rem, env(safe-area-inset-right, 0px));
-    z-index: 10002;
-    pointer-events: auto;
-    background: #0a1018 !important;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  html.menu-open .header-shell,
+  body.menu-open .header-shell {
+    z-index: 10;
   }
 
   html.menu-open .menu-toggle,
   body.menu-open .menu-toggle {
-    z-index: 10002;
+    z-index: 11;
   }
 
+  .mobile-nav,
   .mobile-nav.is-open {
-    z-index: 10000;
+    z-index: 150;
   }
 
   body.menu-open .site-header .header-shell {
