@@ -285,11 +285,31 @@
     -webkit-backdrop-filter: none !important;
   }
 
-  /* Full-screen menu overlay keeps heavy page blur */
+  /* Full-screen menu — keep heavy frosted glass (exempt from perf blur strip) */
   .mobile-nav__backdrop {
-    background-color: rgba(5, 8, 16, 0.78) !important;
-    -webkit-backdrop-filter: blur(48px) saturate(1.25) !important;
-    backdrop-filter: blur(48px) saturate(1.25) !important;
+    background: rgba(8, 12, 22, 0.42) !important;
+    -webkit-backdrop-filter: blur(64px) saturate(1.5) brightness(0.86) !important;
+    backdrop-filter: blur(64px) saturate(1.5) brightness(0.86) !important;
+  }
+
+  .mobile-nav__panel {
+    -webkit-backdrop-filter: blur(24px) saturate(1.35) !important;
+    backdrop-filter: blur(24px) saturate(1.35) !important;
+  }
+
+  /* Lighter page bg blur = more GPU budget for hero WebGL while scrolling */
+  .page-bg img {
+    filter: blur(5px) saturate(1.05) contrast(1.02);
+  }
+
+  html.is-page-scrolling .page-bg img {
+    filter: blur(2px) saturate(1.02);
+  }
+
+  .hero-helmet-scene {
+    contain: layout style;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
 
   .hero-helmet-scene canvas {
@@ -297,6 +317,7 @@
     touch-action: pan-y;
     cursor: default;
     transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
 }
 

@@ -280,9 +280,10 @@ export function createCleaningMachine({ lite = false, logoTexture = null } = {})
   root.add(panelRecess);
 
   const buttonColors = [0xef4444, 0xeab308, 0x3b82f6, 0x22c55e];
+  const btnSegs = lite ? 8 : 16;
   buttonColors.forEach((hex, i) => {
     const btn = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.032, 0.032, 0.018, 16),
+      new THREE.CylinderGeometry(0.032, 0.032, 0.018, btnSegs),
       new THREE.MeshStandardMaterial({ color: hex, emissive: hex, emissiveIntensity: 0.45 })
     );
     btn.rotation.x = Math.PI / 2;

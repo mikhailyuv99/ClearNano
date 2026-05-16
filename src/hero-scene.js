@@ -40,11 +40,36 @@ function frameCamera(camera, controls, object, viewportAspect = 1) {
   controls.update();
 }
 
+function bindMobileScrollPerf() {
+  const root = document.documentElement;
+  let endId = 0;
+
+  const mark = () => {
+    root.classList.add("is-page-scrolling");
+    window.clearTimeout(endId);
+    endId = window.setTimeout(() => root.classList.remove("is-page-scrolling"), 140);
+  };
+
+  window.addEventListener("scroll", mark, { passive: true });
+  window.addEventListener("touchmove", mark, { passive: true, capture: true });
+  window.addEventListener("wheel", mark, { passive: true });
+
+  return () => {
+    window.clearTimeout(endId);
+    window.removeEventListener("scroll", mark);
+    window.removeEventListener("touchmove", mark, { capture: true });
+    window.removeEventListener("wheel", mark);
+    root.classList.remove("is-page-scrolling");
+  };
+}
+
 /** Hero 3D — procedural cleaning kiosk, no GLB. */
 export function initHeroScene(canvas) {
   if (!canvas) return null;
 
   const lite = isMobilePerfMode();
+  const unbindScrollPerf = lite ? bindMobileScrollPerf() : () => {};
+
   const scene = new THREE.Scene();
 
   const camera = new THREE.PerspectiveCamera(36, 1, 0.05, 100);
@@ -53,12 +78,20 @@ export function initHeroScene(canvas) {
     alpha: true,
     antialias: true,
     powerPreference: "high-performance",
+    stencil: false,
+    depth: true,
   });
-  const dpr = Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 2);
-  renderer.setPixelRatio(dpr);
+  const fullDpr = Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 2);
+  const scrollDpr = lite ? Math.min(1.25, fullDpr) : fullDpr;
+  renderer.setPixelRatio(fullDpr);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.22;
+  if (lite) {
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+  } else {
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.22;
+  }
 
   scene.add(new THREE.HemisphereLight(0xdbeafe, 0x0f172a, lite ? 0.95 : 0.85));
   if (!lite) {
@@ -77,7 +110,8 @@ export function initHeroScene(canvas) {
   }
 
   const controls = new OrbitControls(camera, canvas);
-  controls.enableDamping = true;
+  controls.enabled = !lite;
+  controls.enableDamping = !lite;
   controls.dampingFactor = 0.06;
   controls.enablePan = false;
   controls.enableZoom = false;
@@ -96,6 +130,9 @@ export function initHeroScene(canvas) {
       fitModel(machine);
       scene.add(machine);
       machine.userData.userSpinning = true;
+      machine.traverse((o) => {
+        if (o.isMesh) o.frustumCulled = true;
+      });
       const parent = canvas.parentElement;
       const aspect = parent
         ? parent.getBoundingClientRect().width / Math.max(1, parent.getBoundingClientRect().height)
@@ -104,12 +141,14 @@ export function initHeroScene(canvas) {
       return machine;
     });
 
-  controls.addEventListener("start", () => {
-    if (machine) machine.userData.userSpinning = false;
-  });
-  controls.addEventListener("end", () => {
-    if (machine) machine.userData.userSpinning = true;
-  });
+  if (!lite) {
+    controls.addEventListener("start", () => {
+      if (machine) machine.userData.userSpinning = false;
+    });
+    controls.addEventListener("end", () => {
+      if (machine) machine.userData.userSpinning = true;
+    });
+  }
 
   function resize() {
     const parent = canvas.parentElement;
@@ -136,6 +175,29 @@ export function initHeroScene(canvas) {
   );
   viewObserver.observe(canvas.parentElement || canvas);
 
+  let scrollDprActive = false;
+  let scrollDprEndId = 0;
+
+  function syncScrollDpr() {
+    if (!lite) return;
+    const scrolling = document.documentElement.classList.contains("is-page-scrolling");
+    if (scrolling === scrollDprActive) return;
+    scrollDprActive = scrolling;
+    renderer.setPixelRatio(scrolling ? scrollDpr : fullDpr);
+  }
+
+  function markHeroScrollDpr() {
+    if (!lite || !inView) return;
+    syncScrollDpr();
+    window.clearTimeout(scrollDprEndId);
+    scrollDprEndId = window.setTimeout(syncScrollDpr, 160);
+  }
+
+  if (lite) {
+    window.addEventListener("scroll", markHeroScrollDpr, { passive: true });
+    window.addEventListener("touchmove", markHeroScrollDpr, { passive: true, capture: true });
+  }
+
   function isMenuOpen() {
     return document.documentElement.classList.contains("menu-open");
   }
@@ -144,12 +206,16 @@ export function initHeroScene(canvas) {
     return inView && !document.hidden && !isMenuOpen();
   }
 
-  function renderFrame() {
-    controls.update();
+  function applySpin() {
     if (machine && spinSpeed > 0 && machine.userData.userSpinning !== false) {
       const elapsed = performance.now() * 0.001 - spinStartSec;
       machine.rotation.y = elapsed * spinSpeed;
     }
+  }
+
+  function renderFrame() {
+    if (!lite) controls.update();
+    applySpin();
     renderer.render(scene, camera);
   }
 
@@ -161,6 +227,7 @@ export function initHeroScene(canvas) {
 
   renderer.setAnimationLoop(() => {
     if (!shouldRender()) return;
+    if (lite) syncScrollDpr();
     renderFrame();
   });
 
@@ -176,6 +243,12 @@ export function initHeroScene(canvas) {
     waitForHealthy: () => Promise.resolve(),
     dispose() {
       renderer.setAnimationLoop(null);
+      unbindScrollPerf();
+      window.clearTimeout(scrollDprEndId);
+      if (lite) {
+        window.removeEventListener("scroll", markHeroScrollDpr);
+        window.removeEventListener("touchmove", markHeroScrollDpr, { capture: true });
+      }
       document.removeEventListener("visibilitychange", onVisibility);
       ro.disconnect();
       viewObserver.disconnect();
