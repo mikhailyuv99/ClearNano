@@ -1,6 +1,9 @@
+import "./hero-model-preload.js";
 import "./page-fade.js";
 import { initPageBgPin } from "./page-bg-pin.js";
 import { initHeroExperience } from "./hero-init.js";
+
+document.body.classList.add("is-page-ready");
 
 initPageBgPin();
 void initHeroExperience();

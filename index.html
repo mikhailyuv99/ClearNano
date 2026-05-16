@@ -18,18 +18,31 @@
       rel="stylesheet"
     />
     <link rel="icon" type="image/png" href="/images/optimized/logo-p0-img0.webp" />
-    <link rel="preload" href="/models/helmet.glb" as="fetch" crossorigin="anonymous" />
+    <link rel="preload" href="/models/helmet.glb" as="fetch" crossorigin="anonymous" fetchpriority="high" />
+    <link rel="preload" href="/draco/draco_wasm_wrapper.js" as="script" />
     <link rel="stylesheet" href="/src/styles.css" />
     <style>
-      html {
+      html,
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
         background-color: #050810;
       }
-      @media (prefers-reduced-motion: no-preference) {
-        body {
-          opacity: 0;
-        }
+      .site-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        transform: none !important;
       }
     </style>
+    <script>
+      fetch("/models/helmet.glb", { cache: "force-cache", priority: "high" }).catch(function () {});
+    </script>
   </head>
   <body>
     <div class="page-bg-stack" aria-hidden="true">
@@ -118,9 +131,9 @@
             </div>
           </div>
           <div class="hero-visual reveal reveal--instant">
-            <div class="hero-helmet-scene is-loading" id="hero-helmet-stage">
+            <div class="hero-helmet-scene" id="hero-helmet-stage">
               <canvas id="hero-helmet-canvas" aria-label="3D helmet preview"></canvas>
-              <p class="hero-helmet-status hero-helmet-status--loading" data-helmet-status>Loading 3D model...</p>
+              <p class="hero-helmet-status" data-helmet-status hidden></p>
               <div class="hero-card hero-card--time">
                 <div class="hero-card__inner">
                   <strong>5 min</strong>

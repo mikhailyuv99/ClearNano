@@ -124,9 +124,13 @@ html {
   backface-visibility: hidden;
 }
 
-body > :not(.page-bg-stack) {
+body > :not(.page-bg-stack):not(.site-header) {
   position: relative;
   z-index: 1;
+}
+
+.site-header {
+  z-index: 200;
 }
 
 .page-bg {
@@ -175,13 +179,13 @@ body {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  body {
+  body:not(.is-page-ready) main {
     opacity: 0;
   }
 
-  body.is-page-ready {
+  body.is-page-ready main {
     opacity: 1;
-    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
 
@@ -320,18 +324,32 @@ h4 {
 /* Header ù flush to viewport top (no gap above nav) */
 .site-header {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  inset: 0 auto auto 0;
+  width: 100%;
   z-index: 200;
   margin: 0;
   padding: 0;
   height: var(--header-h);
+  border-radius: 0;
   background: var(--glass-bg-solid);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
+  border: none;
   border-bottom: 1px solid var(--glass-border);
   box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.site-header::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -60px;
+  height: 60px;
+  background: inherit;
+  backdrop-filter: inherit;
+  -webkit-backdrop-filter: inherit;
+  pointer-events: none;
 }
 
 .site-header.is-scrolled .header-shell,
@@ -343,7 +361,7 @@ h4 {
 }
 
 .header-shell {
-  height: var(--header-h);
+  height: 100%;
   transition: background 0.35s, box-shadow 0.35s, border 0.35s;
 }
 
@@ -787,14 +805,6 @@ h4 {
   color: var(--ink-soft);
   max-width: 16rem;
   line-height: 1.5;
-}
-
-.hero-helmet-scene.is-loading .hero-helmet-status--loading {
-  display: flex;
-}
-
-.hero-helmet-scene.is-loading canvas {
-  opacity: 0.35;
 }
 
 .hero-helmet-scene:has(canvas) .hero-helmet-status[hidden] {

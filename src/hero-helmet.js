@@ -680,9 +680,10 @@ export function initHeroHelmet(canvas, products = []) {
   /** One transition at a time — avoids torn fades and races. */
   let displayChain = Promise.resolve();
 
-  function loadModelOnce(slug) {
+  async function loadModelOnce(slug) {
+    const buf = await ensureModelBytes(slug);
     return new Promise((resolve, reject) => {
-      loader.load(modelUrl(slug), resolve, undefined, reject);
+      loader.parse(buf, modelUrl(slug), resolve, reject);
     });
   }
 
@@ -873,8 +874,6 @@ export function initHeroHelmet(canvas, products = []) {
     return p;
   }
 
-  setStageMessage(container, "loading", "Loading 3D model…");
-
   const ready = loadModel(firstSlug)
     .then(() => showProduct(firstSlug))
     .then(() => {
@@ -901,6 +900,7 @@ export function initHeroHelmet(canvas, products = []) {
   }
 
   resize();
+  startRenderLoop();
   const ro = new ResizeObserver(resize);
   ro.observe(container);
 
@@ -993,7 +993,6 @@ export function initHeroHelmet(canvas, products = []) {
     cancelAnimationFrame(raf);
   }
 
-  startRenderLoop();
   requestAnimationFrame(() => resize());
 
   const api = {
