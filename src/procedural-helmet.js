@@ -78,16 +78,17 @@ export function createProceduralHelmet(envMap = null, { lite = false } = {}) {
   const visorMat = visorMaterial(envMap, lite);
   const accentMat = accentMaterial(envMap);
 
+  /* LatheGeometry requires x > 0 on every point */
   const profile = [
-    new THREE.Vector2(0.0, -0.62),
+    new THREE.Vector2(0.04, -0.62),
     new THREE.Vector2(0.34, -0.56),
     new THREE.Vector2(0.52, -0.28),
     new THREE.Vector2(0.54, -0.02),
     new THREE.Vector2(0.5, 0.22),
     new THREE.Vector2(0.4, 0.42),
     new THREE.Vector2(0.26, 0.58),
-    new THREE.Vector2(0.1, 0.72),
-    new THREE.Vector2(0.02, 0.76),
+    new THREE.Vector2(0.12, 0.72),
+    new THREE.Vector2(0.05, 0.76),
   ];
 
   const shell = new THREE.Mesh(new THREE.LatheGeometry(profile, 80), shellMat);

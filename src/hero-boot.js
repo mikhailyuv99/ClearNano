@@ -1,2 +1,2 @@
-/** Preload Three.js hero module (no GLB — helmet is procedural). */
-export const heroHelmetModule = import("./hero-helmet.js");
+/** Preload lightweight hero scene (procedural helmet, no GLB). */
+export const heroSceneModule = import("./hero-scene.js");
