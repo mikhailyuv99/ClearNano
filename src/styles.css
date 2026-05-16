@@ -37,7 +37,8 @@ html {
   --font: "IBM Plex Sans", system-ui, sans-serif;
   --font-display: "Sora", system-ui, sans-serif;
   --header-h: 76px;
-  --hero-top: 1.25rem;
+  --hero-top: 1.75rem;
+  --stats-gap: 2.5rem;
   --container: min(1180px, calc(100% - 2.5rem));
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --bg-blur: 14px;
@@ -539,7 +540,7 @@ h4 {
   gap: 1.75rem;
   align-items: center;
   flex: none;
-  padding-bottom: 1rem;
+  padding-bottom: 2.5rem;
   overflow: visible;
 }
 
@@ -752,7 +753,8 @@ h4 {
   outline: none;
 }
 
-.hero-helmet-scene canvas {
+.hero-helmet-scene canvas,
+.hero-helmet-scene model-viewer {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -765,11 +767,13 @@ h4 {
   outline: none;
   box-shadow: none;
   background: transparent;
+  --poster-color: transparent;
   cursor: grab;
   touch-action: none;
 }
 
-.hero-helmet-scene canvas:active {
+.hero-helmet-scene canvas:active,
+.hero-helmet-scene model-viewer:active {
   cursor: grabbing;
 }
 
@@ -798,11 +802,13 @@ h4 {
   line-height: 1.5;
 }
 
-.hero-helmet-scene:has(canvas) .hero-helmet-status[hidden] {
+.hero-helmet-scene:has(canvas) .hero-helmet-status[hidden],
+.hero-helmet-scene:has(model-viewer) .hero-helmet-status[hidden] {
   display: none;
 }
 
-.hero-helmet-scene:has(canvas) .hero-helmet-status--error:not([hidden]) {
+.hero-helmet-scene:has(canvas) .hero-helmet-status--error:not([hidden]),
+.hero-helmet-scene:has(model-viewer) .hero-helmet-status--error:not([hidden]) {
   display: flex;
 }
 
@@ -901,7 +907,7 @@ h4 {
 .stats-strip {
   position: relative;
   z-index: 1;
-  margin-top: 0;
+  margin-top: var(--stats-gap);
   background: var(--glass-bg-solid);
   backdrop-filter: blur(28px) saturate(1.4);
   -webkit-backdrop-filter: blur(28px) saturate(1.4);

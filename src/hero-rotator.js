@@ -14,6 +14,7 @@ export function initHeroRotator(api, products) {
   const layerA = document.querySelector("[data-hero-word-a]");
   const layerB = document.querySelector("[data-hero-word-b]");
   const canvas = document.getElementById("hero-helmet-canvas");
+  const viewer = document.getElementById("hero-helmet-viewer");
 
   if (!wrap || !layerA || !layerB || !products?.length) return;
 
@@ -30,8 +31,9 @@ export function initHeroRotator(api, products) {
   }
 
   function setCanvasLabel(word) {
-    if (!canvas) return;
-    canvas.setAttribute("aria-label", `3D ${word} preview`);
+    const label = `3D ${word} preview`;
+    if (canvas) canvas.setAttribute("aria-label", label);
+    if (viewer) viewer.setAttribute("alt", label);
   }
 
   function clearWordTimer() {

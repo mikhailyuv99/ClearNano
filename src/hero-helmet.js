@@ -10,10 +10,15 @@ import { isMobilePerfMode } from "./device.js";
 
 const FIRST_HERO_SLUG = "helmet";
 
-const sharedDraco = new DRACOLoader();
-sharedDraco.setDecoderPath("/draco/gltf/");
-sharedDraco.setDecoderConfig({ type: "js" });
-sharedDraco.preload();
+let sharedDraco = null;
+
+function getDracoLoader() {
+  if (!sharedDraco) {
+    sharedDraco = new DRACOLoader();
+    sharedDraco.setDecoderPath("/draco/gltf/");
+  }
+  return sharedDraco;
+}
 
 const TARGET_SIZE = 2.35;
 /** Keep in sync with --hero-word-fade-out / --hero-word-fade-in in styles.css */
@@ -519,7 +524,7 @@ function frameCamera(camera, controls, object, padding = getFramePadding()) {
 
 function createLoader() {
   const loader = new GLTFLoader();
-  loader.setDRACOLoader(sharedDraco);
+  loader.setDRACOLoader(getDracoLoader());
   return loader;
 }
 
@@ -683,7 +688,9 @@ export function initHeroHelmet(canvas, products = []) {
 
   function loadModelOnce(slug) {
     return new Promise((resolve, reject) => {
-      loader.load(modelUrl(slug), resolve, undefined, reject);
+      loader.load(modelUrl(slug), resolve, undefined, (err) => {
+        reject(err || new Error(`GLTF load failed: ${slug}`));
+      });
     });
   }
 
@@ -729,21 +736,28 @@ export function initHeroHelmet(canvas, products = []) {
     }
   }
 
+  const FALLBACK_SLUGS = ["helmet", "bicycle-helmet"];
+
   async function loadModel(slug) {
     if (cache.has(slug)) return cache.get(slug);
     if (inflight.has(slug)) return inflight.get(slug);
+
+    const trySlugs =
+      slug === "helmet" ? FALLBACK_SLUGS : [slug, ...FALLBACK_SLUGS.filter((s) => s !== slug)];
 
     const task = (async () => {
       trimGpuCache(cache, availableSlugs, [slug, nextSlugInList(slug, slugs), currentSlug]);
 
       let lastErr;
-      for (let attempt = 0; attempt <= LOAD_RETRIES; attempt++) {
-        try {
-          if (attempt > 0) await new Promise((r) => setTimeout(r, 400 * attempt));
-          const gltf = await loadModelOnce(slug);
-          return await processGltf(gltf, slug);
-        } catch (e) {
-          lastErr = e;
+      for (const trySlug of trySlugs) {
+        for (let attempt = 0; attempt <= LOAD_RETRIES; attempt++) {
+          try {
+            if (attempt > 0) await new Promise((r) => setTimeout(r, 400 * attempt));
+            const gltf = await loadModelOnce(trySlug);
+            return await processGltf(gltf, trySlug);
+          } catch (e) {
+            lastErr = e;
+          }
         }
       }
       console.warn(`[Clear Nano] Failed to load ${modelUrl(slug)}`, lastErr);
@@ -883,9 +897,8 @@ export function initHeroHelmet(canvas, products = []) {
     })
     .catch((err) => {
       console.error("[Clear Nano] Hero model failed:", err);
-      setStageMessage(container, "error", "Could not load 3D model. Check /public/models/helmet.glb");
       startRenderLoop();
-      return api;
+      throw err;
     });
 
   function resize() {
