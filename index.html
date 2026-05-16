@@ -20,6 +20,19 @@
     <link rel="icon" type="image/png" href="/images/optimized/logo-p0-img0.webp" />
     <link rel="modulepreload" href="/src/hero-boot.js" />
     <link rel="stylesheet" href="/src/styles.css?v=menu-fix-2" />
+    <script>
+      (function () {
+        var ua = navigator.userAgent || "";
+        if (
+          /Instagram|FBAN|FBAV|FB_IAB|Messenger|Twitter|Telegram|WhatsApp|Snapchat|TikTok|Line\/|LinkedInApp/i.test(
+            ua
+          ) ||
+          (/Android/i.test(ua) && /;\s*wv\)|WebView/i.test(ua))
+        ) {
+          document.documentElement.classList.add("is-inapp-browser", "is-inapp-scroll");
+        }
+      })();
+    </script>
     <style>
       html,
       body {

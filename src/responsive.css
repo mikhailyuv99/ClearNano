@@ -23,6 +23,49 @@
   }
 }
 
+/* Telegram / Instagram / in-app browsers — body does not scroll; bg stays pinned */
+html.is-inapp-scroll,
+html.is-inapp-scroll body {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  height: var(--app-height, 100%);
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.is-inapp-scroll .page-bg-stack {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  height: var(--app-height, 100lvh);
+  min-height: 100%;
+  transform: none !important;
+  -webkit-transform: none !important;
+}
+
+html.is-inapp-scroll .page-bg img {
+  top: -15%;
+  left: -15%;
+  width: 130%;
+  height: 130%;
+}
+
+html.is-inapp-scroll #main {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+html.menu-open.is-inapp-scroll #main {
+  overflow: hidden;
+}
+
 /* Hero: 3D above CTAs on mobile, tighter vertical rhythm */
 @media (max-width: 959px) {
   .hero-grid {

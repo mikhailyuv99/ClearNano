@@ -1,5 +1,6 @@
 import "./hero-boot.js";
 import "./page-fade.js";
+import { getScrollTop } from "./device.js";
 import { initPageBgPin } from "./page-bg-pin.js";
 import { initMobileMenu } from "./mobile-menu.js";
 
@@ -21,7 +22,7 @@ function formatVnd(n) {
 
 const header = document.querySelector("[data-header]");
 function onHeaderScroll() {
-  header?.classList.toggle("is-scrolled", window.scrollY > 20);
+  header?.classList.toggle("is-scrolled", getScrollTop() > 20);
 }
 
 initMobileMenu();

@@ -1,6 +1,6 @@
 import Lenis from "lenis";
 import "lenis/dist/lenis.css";
-import { isMobilePerfMode } from "./device.js";
+import { getScrollElement, isMobilePerfMode } from "./device.js";
 
 /** Premium smooth scroll — one rAF loop for Lenis + scroll-driven UI */
 export function initSmoothScroll(onScroll) {
@@ -11,7 +11,12 @@ export function initSmoothScroll(onScroll) {
       scheduleScroll();
       window.dispatchEvent(new CustomEvent("app-scroll"));
     };
-    window.addEventListener("scroll", onNativeScroll, { passive: true });
+    const scrollRoot = getScrollElement();
+    if (scrollRoot) {
+      scrollRoot.addEventListener("scroll", onNativeScroll, { passive: true });
+    } else {
+      window.addEventListener("scroll", onNativeScroll, { passive: true });
+    }
     onNativeScroll();
     return { lenis: null, addTick: () => () => {} };
   }
