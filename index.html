@@ -18,7 +18,7 @@
       rel="stylesheet"
     />
     <link rel="icon" type="image/png" href="/images/optimized/logo-p0-img0.webp" />
-    <link rel="preload" href="/models/bicycle-helmet.glb" as="fetch" crossorigin="anonymous" />
+    <link rel="preload" href="/models/helmet.glb" as="fetch" crossorigin="anonymous" />
     <link rel="stylesheet" href="/src/styles.css" />
     <style>
       html {
@@ -119,23 +119,8 @@
           </div>
           <div class="hero-visual reveal reveal--instant">
             <div class="hero-helmet-scene is-loading" id="hero-helmet-stage">
-              <model-viewer
-                id="hero-helmet-viewer"
-                src="/models/helmet.glb"
-                alt="Interactive 3D helmet, drag to rotate"
-                camera-controls
-                auto-rotate
-                rotation-per-second="28deg"
-                interaction-prompt="none"
-                shadow-intensity="1"
-                environment-image="neutral"
-                exposure="1.15"
-                camera-orbit="0deg 72deg 110%"
-                loading="eager"
-                reveal="auto"
-              ></model-viewer>
+              <canvas id="hero-helmet-canvas" aria-label="3D helmet preview"></canvas>
               <p class="hero-helmet-status hero-helmet-status--loading" data-helmet-status>Loading 3D model...</p>
-              <p class="hero-helmet-hint">Drag to rotate</p>
               <div class="hero-card hero-card--time">
                 <div class="hero-card__inner">
                   <strong>5 min</strong>

@@ -1,22 +1,25 @@
-import { initHeroViewer } from "./hero-viewer.js";
+import { initHeroHelmet } from "./hero-helmet.js";
 import { initHeroRotator } from "./hero-rotator.js";
 import { HERO_ROTATION } from "./hero-products.js";
 
 export function initHeroExperience() {
   const stage = document.getElementById("hero-helmet-stage");
-  if (!stage) return;
+  const canvas = document.getElementById("hero-helmet-canvas");
+  if (!stage || !canvas) return;
 
   stage.classList.add("is-loading");
 
-  const api = initHeroViewer(stage);
+  const api = initHeroHelmet(canvas, HERO_ROTATION);
   if (!api) return;
 
-  api.whenReady
+  const ready =
+    typeof api.whenReady === "function" ? api.whenReady() : api.whenReady;
+
+  ready
     .then(() => {
       stage.classList.remove("is-loading");
       const status = stage.querySelector("[data-helmet-status]");
       if (status) status.hidden = true;
-      document.body.classList.add("is-page-ready");
       initHeroRotator(api, HERO_ROTATION);
     })
     .catch((err) => {

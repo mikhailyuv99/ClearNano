@@ -1,3 +1,5 @@
+import { HERO_SINGLE_MODEL } from "./hero-config.js";
+
 /** Milliseconds each hero product stays on screen before the next transition */
 export const HERO_ROTATE_MS = 3500;
 
@@ -11,7 +13,7 @@ export function initHeroRotator(api, products) {
   const wrap = document.querySelector(".hero-word-wrap");
   const layerA = document.querySelector("[data-hero-word-a]");
   const layerB = document.querySelector("[data-hero-word-b]");
-  const viewer = document.getElementById("hero-helmet-viewer");
+  const canvas = document.getElementById("hero-helmet-canvas");
 
   if (!wrap || !layerA || !layerB || !products?.length) return;
 
@@ -27,9 +29,9 @@ export function initHeroRotator(api, products) {
     return frontIsA ? layerB : layerA;
   }
 
-  function setViewerLabel(word) {
-    if (!viewer) return;
-    viewer.setAttribute("alt", `Interactive 3D ${word}, drag to rotate`);
+  function setCanvasLabel(word) {
+    if (!canvas) return;
+    canvas.setAttribute("aria-label", `3D ${word} preview`);
   }
 
   function clearWordTimer() {
@@ -67,7 +69,7 @@ export function initHeroRotator(api, products) {
     wrap.classList.remove("is-word-out");
     wrap.classList.add("is-word-in");
     frontIsA = !frontIsA;
-    setViewerLabel(word);
+    setCanvasLabel(word);
 
     wordTimer = window.setTimeout(() => {
       wrap.classList.remove("is-word-in");
@@ -76,7 +78,7 @@ export function initHeroRotator(api, products) {
   }
 
   setWord(products[0].word);
-  setViewerLabel(products[0].word);
+  setCanvasLabel(products[0].word);
 
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     stopRotation = null;
@@ -99,22 +101,31 @@ export function initHeroRotator(api, products) {
   async function advance() {
     if (!(await ensureGpuReady())) return;
 
+    index = (index + 1) % list.length;
+    const product = list[index];
+
+    if (HERO_SINGLE_MODEL) {
+      wrap.classList.add("is-word-out");
+      crossfadeWord(product.word);
+      return;
+    }
+
     let tries = 0;
     while (tries < list.length && !cancelled) {
-      index = (index + 1) % list.length;
-      const product = list[index];
+      const item = list[index];
       try {
-        await api.showProduct(product.slug, {
+        await api.showProduct(item.slug, {
           onTransitionStart() {
             wrap.classList.add("is-word-out");
           },
           onWordReveal() {
-            crossfadeWord(product.word);
+            crossfadeWord(item.word);
           },
         });
         return;
       } catch {
         tries++;
+        index = (index + 1) % list.length;
       }
     }
   }

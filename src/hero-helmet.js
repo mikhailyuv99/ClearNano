@@ -1001,7 +1001,7 @@ export function initHeroHelmet(canvas, products = []) {
     isAvailable: (slug) => availableSlugs.has(slug),
     isHealthy: () => !contextLost,
     waitForHealthy,
-    whenReady: () => ready,
+    whenReady: ready,
   };
 
   return api;

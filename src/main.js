@@ -1,4 +1,3 @@
-import "@google/model-viewer";
 import "./page-fade.js";
 import { initPageBgPin } from "./page-bg-pin.js";
 import { initHeroExperience } from "./hero-init.js";

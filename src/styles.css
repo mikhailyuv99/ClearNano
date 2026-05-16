@@ -317,26 +317,29 @@ h4 {
   background: #1a2740;
 }
 
-/* Header */
+/* Header ù flush to viewport top (no gap above nav) */
 .site-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 200;
-  height: var(--header-h);
   margin: 0;
   padding: 0;
-  background: transparent;
-}
-
-.site-header.is-scrolled .header-shell,
-.header-shell {
+  height: var(--header-h);
   background: var(--glass-bg-solid);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid var(--glass-border);
   box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.site-header.is-scrolled .header-shell,
+.header-shell {
+  height: 100%;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .header-shell {
@@ -740,7 +743,6 @@ h4 {
   outline: none;
 }
 
-.hero-helmet-scene model-viewer,
 .hero-helmet-scene canvas {
   position: absolute;
   inset: 0;
@@ -749,15 +751,13 @@ h4 {
   width: 100% !important;
   height: 100% !important;
   margin: auto;
-  filter: drop-shadow(0 40px 64px rgba(0, 0, 0, 0.5));
+  padding: 0;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
   cursor: grab;
   touch-action: none;
-  background: transparent;
-  --poster-color: transparent;
-}
-
-.hero-helmet-scene model-viewer {
-  outline: none;
 }
 
 .hero-helmet-scene canvas:active {
@@ -789,48 +789,20 @@ h4 {
   line-height: 1.5;
 }
 
-.hero-helmet-scene.is-loading .hero-helmet-hint {
-  opacity: 0;
-}
-
 .hero-helmet-scene.is-loading .hero-helmet-status--loading {
   display: flex;
 }
 
-.hero-helmet-hint {
-  position: absolute;
-  bottom: 0.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.38);
-  pointer-events: none;
-  z-index: 2;
-  transition: opacity 0.35s;
+.hero-helmet-scene.is-loading canvas {
+  opacity: 0.35;
 }
 
-.hero-helmet-scene:has(.hero-helmet-status[hidden]) .hero-helmet-hint {
-  opacity: 1;
-}
-
-.hero-helmet-scene:has(.hero-helmet-status:not([hidden])) .hero-helmet-hint {
-  opacity: 0;
-}
-
-.hero-helmet-scene:has(model-viewer) .hero-helmet-status[hidden] {
+.hero-helmet-scene:has(canvas) .hero-helmet-status[hidden] {
   display: none;
 }
 
-.hero-helmet-scene:has(model-viewer) .hero-helmet-status--error:not([hidden]) {
+.hero-helmet-scene:has(canvas) .hero-helmet-status--error:not([hidden]) {
   display: flex;
-}
-
-.hero-helmet-scene.is-loading model-viewer {
-  opacity: 0.35;
 }
 
 .hero-card {
