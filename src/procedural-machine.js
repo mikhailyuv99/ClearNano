@@ -73,12 +73,17 @@ const SCREEN_MAT = new THREE.MeshStandardMaterial({
   roughness: 0.32,
 });
 
-function addCenteredLogoPlane(root, logoTexture, { y, z, maxHeight }) {
+function addCenteredLogoPlane(root, logoTexture, { y, z, maxWidth, maxHeight }) {
   const img = logoTexture.image;
   const aspect = img?.width && img?.height ? img.width / img.height : 2.4;
-  const h = maxHeight;
+  let h = maxHeight;
+  let w = h * aspect;
+  if (w > maxWidth) {
+    w = maxWidth;
+    h = w / aspect;
+  }
   const plane = new THREE.Mesh(
-    new THREE.PlaneGeometry(h * aspect, h),
+    new THREE.PlaneGeometry(w, h),
     new THREE.MeshBasicMaterial({
       map: logoTexture,
       transparent: true,
@@ -91,11 +96,15 @@ function addCenteredLogoPlane(root, logoTexture, { y, z, maxHeight }) {
   return plane;
 }
 
-function drawPhoneIcon(ctx, x, y, size, color) {
+const ICON_COLOR = "#0f172a";
+const COMPANY_PHONE = "0902 164 414";
+const COMPANY_EMAIL = "clearnanovn@gmail.com";
+
+function drawPhoneIcon(ctx, x, y, size, color = ICON_COLOR) {
   ctx.save();
   ctx.strokeStyle = color;
   ctx.fillStyle = color;
-  ctx.lineWidth = 3;
+  ctx.lineWidth = Math.max(4, size * 0.09);
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   const w = size * 0.55;
@@ -119,30 +128,66 @@ function drawPhoneIcon(ctx, x, y, size, color) {
   ctx.restore();
 }
 
-const COMPANY_PHONE = "0902 164 414";
+function drawMailIcon(ctx, x, y, size, color = ICON_COLOR) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = "transparent";
+  ctx.lineWidth = Math.max(4, size * 0.09);
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  const w = size * 1.15;
+  const h = size * 0.72;
+  const left = x - w / 2;
+  const top = y - h / 2;
+  ctx.strokeRect(left, top, w, h);
+  ctx.beginPath();
+  ctx.moveTo(left, top);
+  ctx.lineTo(x, top + h * 0.55);
+  ctx.lineTo(left + w, top);
+  ctx.stroke();
+  ctx.restore();
+}
 
-export function createPhoneScreenTexture() {
+export function createTopContactTexture(panelAspect) {
   const canvas = document.createElement("canvas");
-  canvas.width = 720;
-  canvas.height = 280;
+  const h = 520;
+  canvas.height = h;
+  canvas.width = Math.round(h * panelAspect);
   const ctx = canvas.getContext("2d");
-  const accent = "#22d3ee";
-  const cx = canvas.width / 2;
+  const scale = canvas.width / 920;
+  const iconSize = Math.round(68 * scale);
+  const iconCol = iconSize + Math.round(12 * scale);
+  const gap = Math.round(22 * scale);
+  const rowGap = Math.round(36 * scale);
+  const phonePx = Math.round(82 * scale);
+  const emailPx = Math.round(62 * scale);
 
-  ctx.fillStyle = "#0a0f14";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  drawPhoneIcon(ctx, cx, 92, 46, accent);
-
-  ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = "#e8eef4";
-  ctx.font = "700 54px system-ui, Segoe UI, sans-serif";
-  ctx.fillText(COMPANY_PHONE, cx, 168);
+  ctx.fillStyle = ICON_COLOR;
 
-  ctx.fillStyle = "#8b9cb0";
-  ctx.font = "500 22px system-ui, Segoe UI, sans-serif";
-  ctx.fillText("Hotline", cx, 218);
+  ctx.font = `800 ${phonePx}px system-ui, Segoe UI, sans-serif`;
+  const phoneW = ctx.measureText(COMPANY_PHONE).width;
+  ctx.font = `600 ${emailPx}px system-ui, Segoe UI, sans-serif`;
+  const emailW = ctx.measureText(COMPANY_EMAIL).width;
+  const textW = Math.max(phoneW, emailW);
+  const rowH = Math.max(iconSize, phonePx) + Math.round(8 * scale);
+  const blockW = iconCol + gap + textW;
+  const blockH = rowH * 2 + rowGap;
+  const startX = (canvas.width - blockW) / 2;
+  const iconX = startX + iconCol / 2;
+  const textX = startX + iconCol + gap;
+  const blockTop = (canvas.height - blockH) / 2;
+  const row1Y = blockTop + rowH / 2;
+  const row2Y = blockTop + rowH + rowGap + rowH / 2;
+
+  drawPhoneIcon(ctx, iconX, row1Y, iconSize, ICON_COLOR);
+  drawMailIcon(ctx, iconX, row2Y, iconSize, ICON_COLOR);
+
+  ctx.textAlign = "left";
+  ctx.font = `800 ${phonePx}px system-ui, Segoe UI, sans-serif`;
+  ctx.fillText(COMPANY_PHONE, textX, row1Y);
+  ctx.font = `600 ${emailPx}px system-ui, Segoe UI, sans-serif`;
+  ctx.fillText(COMPANY_EMAIL, textX, row2Y);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -314,21 +359,23 @@ export function createCleaningMachine({ lite = false, logoTexture = null } = {})
   topBevel.position.y = 0.86;
   root.add(topBevel);
 
-  const screenFront = new THREE.Mesh(new THREE.BoxGeometry(W * 0.88, 0.36, 0.028), SCREEN_MAT);
-  screenFront.position.set(0, 1.18, D / 2 + 0.025);
-  root.add(screenFront);
-
-  const phoneTex = createPhoneScreenTexture();
-  const phoneAspect = canvasAspect(phoneTex);
-  const phoneH = 0.32;
-  const phoneW = Math.min(phoneH * phoneAspect, W * 0.84);
-  const phonePanel = new THREE.Mesh(
-    new THREE.PlaneGeometry(phoneW, phoneH),
-    new THREE.MeshBasicMaterial({ map: phoneTex, toneMapped: false })
+  const topPanelW = W * 1.06;
+  const topPanelH = 0.48;
+  const topPanelCenterY = 1.12;
+  const topPanelAspect = topPanelW / topPanelH;
+  const topContactTex = createTopContactTexture(topPanelAspect);
+  const topContactPanel = new THREE.Mesh(
+    new THREE.PlaneGeometry(topPanelW, topPanelH),
+    new THREE.MeshBasicMaterial({
+      map: topContactTex,
+      transparent: true,
+      toneMapped: false,
+      depthWrite: false,
+    })
   );
-  phonePanel.position.set(0, 1.18, D / 2 + 0.042);
-  root.add(phonePanel);
-  root.userData.phoneScreenTexture = phoneTex;
+  topContactPanel.position.set(0, topPanelCenterY, D / 2 + 0.036);
+  root.add(topContactPanel);
+  root.userData.topContactTexture = topContactTex;
 
   const screenSideL = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.32, D * 0.82), SCREEN_MAT);
   screenSideL.position.set(-W / 2 - 0.02, 1.14, 0);
@@ -338,11 +385,18 @@ export function createCleaningMachine({ lite = false, logoTexture = null } = {})
   screenSideR.position.set(W / 2 + 0.02, 1.14, 0);
   root.add(screenSideR);
 
+  const bottomPanelTop = -0.055;
+  const bottomPanelBottom = -0.92;
+  const bottomPanelCenterY = (bottomPanelTop + bottomPanelBottom) / 2;
+  const bottomPanelHeight = bottomPanelTop - bottomPanelBottom;
+  const bottomZ = D / 2 + 0.042;
+
   if (logoTexture) {
     addCenteredLogoPlane(root, logoTexture, {
-      y: -0.1,
-      z: D / 2 + 0.042,
-      maxHeight: 0.14,
+      y: bottomPanelCenterY,
+      z: bottomZ,
+      maxWidth: W * 0.9,
+      maxHeight: bottomPanelHeight * 0.92,
     });
     root.userData.logoTexture = logoTexture;
   }

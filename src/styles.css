@@ -958,6 +958,20 @@ h4 {
     height: min(48vh, 440px);
     min-height: 300px;
   }
+
+  /* Flank the machine without shrinking the 3D canvas */
+  .hero-card--time {
+    top: 50%;
+    left: 0;
+    transform: translateY(-85%);
+  }
+
+  .hero-card--shield {
+    top: 50%;
+    right: 0;
+    bottom: auto;
+    transform: translateY(15%);
+  }
 }
 
 /* Marquee */
