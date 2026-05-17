@@ -268,6 +268,24 @@
 }
 
 /* ─── Paths split (Built for everyone) ─── */
+.paths-kiosk-wrap {
+  display: flex;
+  justify-content: center;
+  padding: clamp(1.5rem, 4vw, 2.5rem) 1rem 0;
+}
+
+.paths-kiosk-stage {
+  width: min(100%, 520px);
+  height: min(52vh, 480px);
+  min-height: 300px;
+  pointer-events: auto;
+}
+
+.paths-kiosk-stage canvas {
+  pointer-events: auto;
+  touch-action: pan-y;
+}
+
 .paths-section {
   padding-bottom: 0;
 }

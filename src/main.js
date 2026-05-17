@@ -1,11 +1,13 @@
 import "./hero-boot.js";
 import "./page-fade.js";
 import { getScrollTop } from "./device.js";
+import { initI18n } from "./i18n.js";
 import { initPageBgPin } from "./page-bg-pin.js";
 import { initMobileMenu } from "./mobile-menu.js";
 
 document.body.classList.add("is-page-ready");
 
+initI18n();
 initPageBgPin();
 
 import("./hero-init.js")

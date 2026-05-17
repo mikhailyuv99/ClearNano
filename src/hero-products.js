@@ -1,34 +1,32 @@
 /**
- * Items Clear Nano can disinfect (from site copy + marquee).
- * GLB files live in /public/models/{slug}.glb
+ * Hero word carousel — slug maps to i18n keys under words.*
  */
-export const CLEANABLE_ITEMS = [
-  { slug: "helmet", word: "helmet", label: "Motorbike helmets" },
-  { slug: "boxing-gloves", word: "boxing gloves", label: "Boxing gloves" },
-  { slug: "sports-shoes", word: "shoes", label: "Sports shoes" },
-  { slug: "knee-guards", word: "guards", label: "Knee & elbow guards" },
-  { slug: "riding-gloves", word: "riding gloves", label: "Riding gloves" },
-  { slug: "bicycle-helmet", word: "bike helmet", label: "Bicycle helmets" },
-  { slug: "vr-headset", word: "headset", label: "VR headsets" },
-  { slug: "masks", word: "mask", label: "Masks & face covers" },
-  { slug: "ice-skates", word: "skates", label: "Ice skates" },
-  { slug: "gym-equipment", word: "gym gear", label: "Gym equipment" },
-  { slug: "hard-hat", word: "hard hat", label: "Hard hats" },
+export const HERO_ROTATION = [
+  { slug: "helmet", wordKey: "words.helmet" },
+  { slug: "boxing-gloves", wordKey: "words.boxing-gloves" },
+  { slug: "riding-gloves", wordKey: "words.riding-gloves" },
+  { slug: "sports-shoes", wordKey: "words.sports-shoes" },
+  { slug: "knee-guards", wordKey: "words.knee-guards" },
+  { slug: "vr-headset", wordKey: "words.vr-headset" },
+  { slug: "masks", wordKey: "words.masks" },
+  { slug: "ice-skates", wordKey: "words.ice-skates" },
+  { slug: "hard-hat", wordKey: "words.hard-hat" },
+  { slug: "bicycle-helmet", wordKey: "words.bicycle-helmet" },
+  { slug: "gym-equipment", wordKey: "words.gym-equipment" },
 ];
 
-/** Hero title + 3D rotation (order = carousel order) */
-export const HERO_ROTATION = [
-  { slug: "helmet", word: "helmet" },
-  { slug: "boxing-gloves", word: "boxing gloves" },
-  { slug: "riding-gloves", word: "riding gloves" },
-  { slug: "sports-shoes", word: "shoes" },
-  { slug: "knee-guards", word: "guards" },
-  { slug: "vr-headset", word: "headset" },
-  { slug: "masks", word: "mask" },
-  { slug: "ice-skates", word: "skates" },
-  { slug: "hard-hat", word: "hard hat" },
-  { slug: "bicycle-helmet", word: "bike helmet" },
-  { slug: "gym-equipment", word: "gym gear" },
+export const CLEANABLE_ITEMS = [
+  { slug: "helmet", wordKey: "words.helmet", labelKey: "marquee.gear.0" },
+  { slug: "boxing-gloves", wordKey: "words.boxing-gloves", labelKey: "marquee.gear.1" },
+  { slug: "sports-shoes", wordKey: "words.sports-shoes", labelKey: "marquee.gear.2" },
+  { slug: "knee-guards", wordKey: "words.knee-guards", labelKey: "marquee.gear.3" },
+  { slug: "riding-gloves", wordKey: "words.riding-gloves", labelKey: "marquee.gear.4" },
+  { slug: "bicycle-helmet", wordKey: "words.bicycle-helmet", labelKey: "marquee.gear.5" },
+  { slug: "vr-headset", wordKey: "words.vr-headset", labelKey: "marquee.gear.6" },
+  { slug: "masks", wordKey: "words.masks", labelKey: "marquee.gear.7" },
+  { slug: "ice-skates", wordKey: "words.ice-skates", labelKey: "marquee.gear.8" },
+  { slug: "gym-equipment", wordKey: "words.gym-equipment", labelKey: "marquee.gear.9" },
+  { slug: "hard-hat", wordKey: "words.hard-hat", labelKey: "marquee.gear.10" },
 ];
 
 export function modelUrl(slug) {

@@ -1,28 +1,31 @@
 import { initHeroRotator } from "./hero-rotator.js";
 import { HERO_ROTATION } from "./hero-products.js";
 import { heroSceneModule } from "./hero-boot.js";
+import { initHeroVideo } from "./hero-video.js";
+import { t } from "./i18n.js";
 
 export async function initHeroExperience() {
-  const stage = document.getElementById("hero-helmet-stage");
-  const canvas = document.getElementById("hero-helmet-canvas");
-  if (!stage || !canvas) return;
+  initHeroVideo();
 
-  const status = stage.querySelector("[data-helmet-status]");
-  if (status) status.hidden = true;
+  const kioskStage = document.getElementById("paths-kiosk-stage");
+  const kioskCanvas = document.getElementById("paths-kiosk-canvas");
 
-  try {
-    const { initHeroScene } = await heroSceneModule;
-    const api = initHeroScene(canvas);
-    if (!api) throw new Error("Hero scene failed to start");
+  if (kioskStage && kioskCanvas) {
+    const status = kioskStage.querySelector("[data-helmet-status]");
+    if (status) status.hidden = true;
 
-    await api.whenReady;
-    initHeroRotator(api, HERO_ROTATION);
-  } catch (err) {
-    console.error("[Clear Nano] Hero 3D failed:", err);
-    if (status) {
-      status.hidden = false;
-      status.className = "hero-helmet-status hero-helmet-status--error";
-      status.textContent = "3D preview unavailable.";
+    let api = null;
+    try {
+      const { initHeroScene } = await heroSceneModule;
+      api = initHeroScene(kioskCanvas);
+      if (api) await api.whenReady;
+      kioskCanvas.setAttribute("aria-label", t("paths.kioskLabel"));
+    } catch (err) {
+      console.error("[Clear Nano] Paths kiosk 3D failed:", err);
     }
+    initHeroRotator(api, HERO_ROTATION);
+    return;
   }
+
+  initHeroRotator(null, HERO_ROTATION);
 }

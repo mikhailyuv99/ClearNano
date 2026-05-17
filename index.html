@@ -87,7 +87,7 @@
       </div>
       <div class="page-bg-overlay"></div>
     </div>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 
     <header class="site-header" data-header>
       <div class="header-shell">
@@ -97,15 +97,19 @@
             <span>Clear Nano</span>
           </a>
           <nav class="nav" aria-label="Primary">
-            <a href="#how">How it works</a>
-            <a href="#technology">Technology</a>
-            <a href="#disinfect">What we clean</a>
-            <a href="#business">For business</a>
-            <a href="#contact">Contact</a>
+            <a href="#how" data-i18n="nav.how">How it works</a>
+            <a href="#technology" data-i18n="nav.technology">Technology</a>
+            <a href="#disinfect" data-i18n="nav.disinfect">What we clean</a>
+            <a href="#business" data-i18n="nav.business">For business</a>
+            <a href="#contact" data-i18n="nav.contact">Contact</a>
           </nav>
+          <div class="lang-switch" role="group" data-i18n-aria="lang.label">
+            <button type="button" class="lang-switch__btn is-active" data-lang="en" aria-pressed="true">EN</button>
+            <button type="button" class="lang-switch__btn" data-lang="ru" aria-pressed="false">RU</button>
+          </div>
           <div class="header-cta">
-            <a class="btn btn-ghost" href="#find">Find a machine</a>
-            <a class="btn btn-primary" href="#partner">Become a partner</a>
+            <a class="btn btn-ghost" href="#find" data-i18n="nav.find">Find a machine</a>
+            <a class="btn btn-primary" href="#partner" data-i18n="nav.partner">Become a partner</a>
           </div>
           <button
             class="menu-toggle"
@@ -114,7 +118,7 @@
             aria-controls="mobile-nav"
             data-menu-toggle
           >
-            <span class="sr-only">Menu</span>
+            <span class="sr-only" data-i18n="nav.menu">Menu</span>
             <span class="menu-toggle__bar" aria-hidden="true"></span>
             <span class="menu-toggle__bar" aria-hidden="true"></span>
             <span class="menu-toggle__bar" aria-hidden="true"></span>
@@ -130,44 +134,53 @@
           <div class="hero-copy reveal reveal--instant">
             <div class="hero-copy__head">
             <h1 id="hero-title">
-              Your <span class="hero-word-wrap" aria-live="polite"><span class="hero-word-slot"><span class="hero-word-layer is-visible" data-hero-word-a>helmet</span><span class="hero-word-layer" data-hero-word-b aria-hidden="true"></span></span></span><br />
-              <span class="gradient-text">Clean in 5 minutes.</span>
+              <span data-i18n="hero.titlePrefix">Your</span> <span class="hero-word-wrap" aria-live="polite"><span class="hero-word-slot"><span class="hero-word-layer is-visible" data-hero-word-a>helmet</span><span class="hero-word-layer" data-hero-word-b aria-hidden="true"></span></span></span><br />
+              <span class="gradient-text" data-i18n="hero.titleGradient">Clean in 5 minutes.</span>
             </h1>
-            <p class="hero-lead">
+            <p class="hero-lead" data-i18n="hero.lead">
               Automated cabinets that disinfect helmets, sports gear, and everyday items with
               UV, nano-silver fog, and ozone &mdash; then dry them completely. No app. No sweat smell.
             </p>
             </div>
             <div class="hero-copy__foot">
             <div class="hero-actions">
-              <a class="btn btn-primary btn-lg" href="#find">Find nearest machine</a>
-              <a class="btn btn-secondary btn-lg" href="#partner">Partner with us</a>
+              <a class="btn btn-primary btn-lg" href="#find" data-i18n="hero.ctaFind">Find nearest machine</a>
+              <a class="btn btn-secondary btn-lg" href="#partner" data-i18n="hero.ctaPartner">Partner with us</a>
             </div>
             <ul class="hero-chips">
-              <li>20,000&#8363; per cycle</li>
-              <li>99.9% bacteria eliminated</li>
-              <li>Cash &amp; QR payment</li>
+              <li data-i18n="hero.chipPrice">20,000&#8363; per cycle</li>
+              <li data-i18n="hero.chipBacteria">99.9% bacteria eliminated</li>
+              <li data-i18n="hero.chipPay">Cash &amp; QR payment</li>
             </ul>
             </div>
           </div>
           <div class="hero-visual reveal reveal--instant">
-            <div class="hero-helmet-scene" id="hero-helmet-stage">
-              <canvas id="hero-helmet-canvas" aria-label="3D cleaning machine preview"></canvas>
-              <p class="hero-helmet-status" data-helmet-status hidden></p>
+            <div class="hero-video-wrap" id="hero-video-stage">
+              <video
+                class="hero-video"
+                data-hero-video
+                src="/videos/hero-loop.mp4"
+                playsinline
+                muted
+                loop
+                autoplay
+                preload="auto"
+                data-i18n-aria="hero.videoLabel"
+              ></video>
             </div>
           </div>
         </div>
         <div class="stats-strip">
           <div class="container stats-inner">
-            <div class="stat-item"><strong>5 min</strong><span>Per cycle</span></div>
-            <div class="stat-item"><strong>99.9%</strong><span>Bacteria killed</span></div>
-            <div class="stat-item"><strong>4 days</strong><span>Protection</span></div>
-            <div class="stat-item"><strong>20k&#8363;</strong><span>Per use</span></div>
+            <div class="stat-item"><strong>5 min</strong><span data-i18n="hero.statMin">Per cycle</span></div>
+            <div class="stat-item"><strong>99.9%</strong><span data-i18n="hero.statBacteria">Bacteria killed</span></div>
+            <div class="stat-item"><strong>4 days</strong><span data-i18n="hero.statProtection">Protection</span></div>
+            <div class="stat-item"><strong>20k&#8363;</strong><span data-i18n="hero.statPrice">Per use</span></div>
           </div>
         </div>
       </section>
 
-      <div class="marquee reveal reveal--fade" aria-hidden="true">
+      <div class="marquee reveal reveal--fade" aria-hidden="true" data-i18n-marquee="marquee.main">
         <div class="marquee-track">
           <span>Helmet disinfection</span><span>Made in Vietnam</span><span>US technology</span>
           <span>Parking lots</span><span>Gyms &amp; fitness</span><span>Repair shops</span>
@@ -181,9 +194,9 @@
       <section class="section problem-tapcard" id="problem">
         <div class="container">
           <header class="section-head reveal reveal--fade">
-            <span class="section-label">The problem</span>
-            <h2 class="section-title section-title--split">99% of riders never clean their helmet.</h2>
-            <p class="section-desc section-desc--wide">
+            <span class="section-label" data-i18n="problem.label">The problem</span>
+            <h2 class="section-title section-title--split" data-i18n="problem.title">99% of riders never clean their helmet.</h2>
+            <p class="section-desc section-desc--wide" data-i18n="problem.desc">
               Sweat, dust, and humidity create bacteria and odor &mdash; with no convenient fix on the street.
             </p>
           </header>
@@ -191,29 +204,29 @@
             <li class="problem-row glass-card reveal reveal--scale">
               <span class="problem-row__num" aria-hidden="true">01</span>
               <div class="problem-row__content">
-                <h3>Bacteria &amp; mold</h3>
-                <p>Builds inside the liner after every ride. Wiping the shell is not enough.</p>
+                <h3 data-i18n="problem.r1h">Bacteria &amp; mold</h3>
+                <p data-i18n="problem.r1p">Builds inside the liner after every ride. Wiping the shell is not enough.</p>
               </div>
             </li>
             <li class="problem-row glass-card reveal reveal--scale" style="--delay: 0.08s">
               <span class="problem-row__num" aria-hidden="true">02</span>
               <div class="problem-row__content">
-                <h3>Persistent odor</h3>
-                <p>Trapped sweat and moisture &mdash; uncomfortable and embarrassing.</p>
+                <h3 data-i18n="problem.r2h">Persistent odor</h3>
+                <p data-i18n="problem.r2p">Trapped sweat and moisture &mdash; uncomfortable and embarrassing.</p>
               </div>
             </li>
             <li class="problem-row glass-card reveal reveal--scale" style="--delay: 0.16s">
               <span class="problem-row__num" aria-hidden="true">03</span>
               <div class="problem-row__content">
-                <h3>Shared gear risk</h3>
-                <p>Gloves, pads, and rental helmets carry more bacteria than most people expect.</p>
+                <h3 data-i18n="problem.r3h">Shared gear risk</h3>
+                <p data-i18n="problem.r3p">Gloves, pads, and rental helmets carry more bacteria than most people expect.</p>
               </div>
             </li>
             <li class="problem-row glass-card reveal reveal--scale" style="--delay: 0.24s">
               <span class="problem-row__num" aria-hidden="true">04</span>
               <div class="problem-row__content">
-                <h3>No quick fix</h3>
-                <p>Until now, deep disinfection meant time, chemicals, or doing nothing.</p>
+                <h3 data-i18n="problem.r4h">No quick fix</h3>
+                <p data-i18n="problem.r4p">Until now, deep disinfection meant time, chemicals, or doing nothing.</p>
               </div>
             </li>
           </ol>
@@ -222,9 +235,9 @@
       <section class="section process-section" id="how">
         <div class="container">
           <header class="section-head section-head--center reveal reveal--fade">
-            <span class="section-label">How it works</span>
-            <h2 class="section-title">Insert. Wait. Ride clean.</h2>
-            <p class="section-desc">Four steps. Five minutes. Completely dry when you take it out.</p>
+            <span class="section-label" data-i18n="how.label">How it works</span>
+            <h2 class="section-title" data-i18n="how.title">Insert. Wait. Ride clean.</h2>
+            <p class="section-desc" data-i18n="how.desc">Four steps. Five minutes. Completely dry when you take it out.</p>
           </header>
         </div>
         <div class="process-rail" data-timeline="how">
@@ -236,8 +249,8 @@
             <li class="process-step process-step--left" data-step>
               <article class="process-step__panel glass-card">
                 <span class="process-step__index">01</span>
-                <h3>Place your item</h3>
-                <p>Helmet, gloves, shoes, or compatible gear inside the cabinet.</p>
+                <h3 data-i18n="how.s1h">Place your item</h3>
+                <p data-i18n="how.s1p">Helmet, gloves, shoes, or compatible gear inside the cabinet.</p>
               </article>
               <span class="process-step__node" aria-hidden="true"><span class="process-step__node-core"></span></span>
             </li>
@@ -245,15 +258,15 @@
               <span class="process-step__node" aria-hidden="true"><span class="process-step__node-core"></span></span>
               <article class="process-step__panel glass-card">
                 <span class="process-step__index">02</span>
-                <h3>Pay &amp; start</h3>
-                <p>20,000&#8363; via cash or QR. The cycle starts automatically.</p>
+                <h3 data-i18n="how.s2h">Pay &amp; start</h3>
+                <p data-i18n="how.s2p">20,000&#8363; via cash or QR. The cycle starts automatically.</p>
               </article>
             </li>
             <li class="process-step process-step--left" data-step>
               <article class="process-step__panel glass-card">
                 <span class="process-step__index">03</span>
-                <h3>Deep clean</h3>
-                <p>UV, nano-silver fog, and ozone reach every corner &mdash; 360&deg;.</p>
+                <h3 data-i18n="how.s3h">Deep clean</h3>
+                <p data-i18n="how.s3p">UV, nano-silver fog, and ozone reach every corner &mdash; 360&deg;.</p>
               </article>
               <span class="process-step__node" aria-hidden="true"><span class="process-step__node-core"></span></span>
             </li>
@@ -261,8 +274,8 @@
               <span class="process-step__node" aria-hidden="true"><span class="process-step__node-core"></span></span>
               <article class="process-step__panel glass-card">
                 <span class="process-step__index">04</span>
-                <h3>Dry &amp; protected</h3>
-                <p>Built-in drying. Nano layer helps protect for up to 4 days.</p>
+                <h3 data-i18n="how.s4h">Dry &amp; protected</h3>
+                <p data-i18n="how.s4p">Built-in drying. Nano layer helps protect for up to 4 days.</p>
               </article>
             </li>
           </ol>
@@ -271,21 +284,21 @@
       <section class="section section-alt" id="technology">
         <div class="container">
           <header class="section-head reveal reveal--fade">
-            <span class="section-label">Technology</span>
-            <h2 class="section-title">Hospital-grade methods. Street-corner convenience.</h2>
-            <p class="section-desc">US patent-based disinfection, assembled in Ho Chi Minh City, monitored 24/7 via IoT.</p>
+            <span class="section-label" data-i18n="tech.label">Technology</span>
+            <h2 class="section-title" data-i18n="tech.title">Hospital-grade methods. Street-corner convenience.</h2>
+            <p class="section-desc" data-i18n="tech.desc">US patent-based disinfection, assembled in Ho Chi Minh City, monitored 24/7 via IoT.</p>
           </header>
           <div class="tech-split reveal">
             <div class="tech-split-visual">
-              <img src="/images/optimized/1-vi-p0-img0.webp" alt="Clear Nano disinfection cabinet" loading="lazy" />
+              <img src="/images/optimized/1-vi-p0-img0.webp" data-i18n-alt="tech.imgAlt" alt="Clear Nano disinfection cabinet" loading="lazy" />
             </div>
             <ul class="tech-split-list">
-              <li><strong>Dual UV + ozone</strong><span>99.9% bacteria elimination and odor neutralization.</span></li>
-              <li><strong>Nano-silver fog</strong><span>360&deg; coverage inside the chamber &mdash; nothing missed.</span></li>
-              <li><strong>Full dry cycle</strong><span>Wear immediately &mdash; no damp liner.</span></li>
-              <li><strong>Nano protection</strong><span>Stays fresher up to 4 days after one run.</span></li>
-              <li><strong>IoT monitoring</strong><span>We service machines before they go down.</span></li>
-              <li><strong>Official fluid only</strong><span>Skin-safe formula &mdash; warranty compliant.</span></li>
+              <li><strong data-i18n="tech.f1">Dual UV + ozone</strong><span data-i18n="tech.f1d">99.9% bacteria elimination and odor neutralization.</span></li>
+              <li><strong data-i18n="tech.f2">Nano-silver fog</strong><span data-i18n="tech.f2d">360&deg; coverage inside the chamber &mdash; nothing missed.</span></li>
+              <li><strong data-i18n="tech.f3">Full dry cycle</strong><span data-i18n="tech.f3d">Wear immediately &mdash; no damp liner.</span></li>
+              <li><strong data-i18n="tech.f4">Nano protection</strong><span data-i18n="tech.f4d">Stays fresher up to 4 days after one run.</span></li>
+              <li><strong data-i18n="tech.f5">IoT monitoring</strong><span data-i18n="tech.f5d">We service machines before they go down.</span></li>
+              <li><strong data-i18n="tech.f6">Official fluid only</strong><span data-i18n="tech.f6d">Skin-safe formula &mdash; warranty compliant.</span></li>
             </ul>
           </div>
         </div>
@@ -294,12 +307,12 @@
       <section class="section gear-marquee-section" id="disinfect">
         <div class="container reveal">
           <header class="section-head section-head--center">
-            <span class="section-label">More than helmets</span>
-            <h2 class="section-title">One machine. Dozens of items.</h2>
-            <p class="section-desc">If it fits inside, we can likely disinfect it.</p>
+            <span class="section-label" data-i18n="disinfect.label">More than helmets</span>
+            <h2 class="section-title" data-i18n="disinfect.title">One machine. Dozens of items.</h2>
+            <p class="section-desc" data-i18n="disinfect.desc">If it fits inside, we can likely disinfect it.</p>
           </header>
         </div>
-        <div class="marquee marquee--gear" aria-hidden="true">
+        <div class="marquee marquee--gear" aria-hidden="true" data-i18n-marquee="marquee.gear">
           <div class="marquee-track">
             <span>Motorbike helmets</span><span>Boxing gloves</span><span>Sports shoes</span><span>Knee & elbow guards</span><span>Riding gloves</span><span>Bicycle helmets</span><span>VR headsets</span><span>Masks & face covers</span><span>Ice skates</span><span>Gym equipment</span><span>Hard hats</span><span>Motorbike helmets</span><span>Boxing gloves</span><span>Sports shoes</span><span>Knee & elbow guards</span><span>Riding gloves</span><span>Bicycle helmets</span><span>VR headsets</span><span>Masks & face covers</span><span>Ice skates</span><span>Gym equipment</span><span>Hard hats</span>
           </div>
@@ -307,38 +320,44 @@
       </section>
 
       <section class="paths-section" id="paths">
+        <div class="paths-kiosk-wrap reveal reveal--fade">
+          <div class="paths-kiosk-stage hero-helmet-scene" id="paths-kiosk-stage">
+            <canvas id="paths-kiosk-canvas" data-i18n-aria="paths.kioskLabel"></canvas>
+            <p class="hero-helmet-status" data-helmet-status hidden></p>
+          </div>
+        </div>
         <div class="container">
           <header class="section-head section-head--center reveal reveal--fade">
-            <span class="section-label">Built for everyone</span>
-            <h2 class="section-title">Riders and businesses. Equally.</h2>
-            <p class="section-desc">Two audiences. One platform. Pick the path that fits you.</p>
+            <span class="section-label" data-i18n="paths.label">Built for everyone</span>
+            <h2 class="section-title" data-i18n="paths.title">Riders and businesses. Equally.</h2>
+            <p class="section-desc" data-i18n="paths.desc">Two audiences. One platform. Pick the path that fits you.</p>
           </header>
         </div>
         <div class="paths-duo">
           <article class="paths-duo__col paths-duo__col--riders reveal" id="find">
             <div class="paths-duo__inner">
-              <p class="paths-duo__eyebrow">For riders</p>
-              <h3>Clean gear in five minutes.<br />No app required.</h3>
-              <p class="paths-duo__lead">Find a Clear Nano cabinet, pay 20,000&#8363;, and collect your gear dry and disinfected.</p>
+              <p class="paths-duo__eyebrow" data-i18n="paths.ridersEyebrow">For riders</p>
+              <h3 data-i18n-html="paths.ridersTitle">Clean gear in five minutes.<br />No app required.</h3>
+              <p class="paths-duo__lead" data-i18n="paths.ridersLead">Find a Clear Nano cabinet, pay 20,000&#8363;, and collect your gear dry and disinfected.</p>
               <ul class="paths-duo__list">
-                <li>Cash or QR at the machine</li>
-                <li>Completely dry &mdash; ready to wear</li>
-                <li>No sweat smell after one cycle</li>
+                <li data-i18n="paths.ridersL1">Cash or QR at the machine</li>
+                <li data-i18n="paths.ridersL2">Completely dry &mdash; ready to wear</li>
+                <li data-i18n="paths.ridersL3">No sweat smell after one cycle</li>
               </ul>
-              <a class="btn btn-primary btn-lg" href="tel:+84902164414">Find a machine</a>
+              <a class="btn btn-primary btn-lg" href="tel:+84902164414" data-i18n="paths.ridersCta">Find a machine</a>
             </div>
           </article>
           <article class="paths-duo__col paths-duo__col--biz reveal" id="partner" style="--delay: 0.08s">
             <div class="paths-duo__inner">
-              <p class="paths-duo__eyebrow">For business</p>
-              <h3>Turn 12 m into<br />weekly income.</h3>
-              <p class="paths-duo__lead">We install, operate, and maintain the cabinet. You earn from day one on partnership models.</p>
+              <p class="paths-duo__eyebrow" data-i18n="paths.bizEyebrow">For business</p>
+              <h3 data-i18n-html="paths.bizTitle">Turn 12 m&sup2; into<br />weekly income.</h3>
+              <p class="paths-duo__lead" data-i18n="paths.bizLead">We install, operate, and maintain the cabinet. You earn from day one on partnership models.</p>
               <ul class="paths-duo__list">
-                <li>Revenue share, rent, or purchase</li>
-                <li>Zero install cost on partnerships</li>
-                <li>30-day trial &mdash; we remove if needed</li>
+                <li data-i18n="paths.bizL1">Revenue share, rent, or purchase</li>
+                <li data-i18n="paths.bizL2">Zero install cost on partnerships</li>
+                <li data-i18n="paths.bizL3">30-day trial &mdash; we remove if needed</li>
               </ul>
-              <a class="btn btn-secondary btn-lg" href="#business">Explore partnerships</a>
+              <a class="btn btn-secondary btn-lg" href="#business" data-i18n="paths.bizCta">Explore partnerships</a>
             </div>
           </article>
         </div>
@@ -346,50 +365,50 @@
       <section class="venues-section" id="venues">
         <div class="container section-intro reveal">
           <header class="section-head">
-            <span class="section-label">Perfect locations</span>
-            <h2 class="section-title">High-traffic places across Vietnam.</h2>
-            <p class="section-desc">Where Clear Nano performs best for riders and partners across Ho Chi Minh City.</p>
+            <span class="section-label" data-i18n="venues.label">Perfect locations</span>
+            <h2 class="section-title" data-i18n="venues.title">High-traffic places across Vietnam.</h2>
+            <p class="section-desc" data-i18n="venues.desc">Where Clear Nano performs best for riders and partners across Ho Chi Minh City.</p>
           </header>
         </div>
         <div class="venue-list container">
           <article class="venue-row venue-row--left reveal">
             <figure class="venue-row__media">
-              <img src="/images/venues/parking.jpg?v=2" alt="Aerial view of a large outdoor parking lot" width="1600" height="1067" loading="eager" decoding="async" fetchpriority="high" />
+              <img src="/images/venues/parking.jpg?v=2" data-i18n-alt="venues.altParking" alt="Aerial view of a large outdoor parking lot" width="1600" height="1067" loading="eager" decoding="async" fetchpriority="high" />
             </figure>
             <div class="venue-row__body">
               <span class="venue-row__index">01</span>
-              <h3>Parking lots</h3>
-              <p>Passive income while riders clean helmets before they leave. High daily footfall, minimal space.</p>
+              <h3 data-i18n="venues.v1h">Parking lots</h3>
+              <p data-i18n="venues.v1p">Passive income while riders clean helmets before they leave. High daily footfall, minimal space.</p>
             </div>
           </article>
           <article class="venue-row venue-row--right reveal" style="--delay: 0.06s">
             <figure class="venue-row__media">
-              <img src="/images/venues/gym.jpg?v=2" alt="Modern gym with strength training equipment" width="1600" height="1067" loading="lazy" decoding="async" />
+              <img src="/images/venues/gym.jpg?v=2" data-i18n-alt="venues.altGym" alt="Modern gym with strength training equipment" width="1600" height="1067" loading="lazy" decoding="async" />
             </figure>
             <div class="venue-row__body">
               <span class="venue-row__index">02</span>
-              <h3>Gyms &amp; fitness</h3>
-              <p>Disinfect gloves and shoes between sessions. Better member experience plus recurring revenue.</p>
+              <h3 data-i18n="venues.v2h">Gyms &amp; fitness</h3>
+              <p data-i18n="venues.v2p">Disinfect gloves and shoes between sessions. Better member experience plus recurring revenue.</p>
             </div>
           </article>
           <article class="venue-row venue-row--left reveal" style="--delay: 0.12s">
             <figure class="venue-row__media">
-              <img src="/images/venues/repair.jpg?v=2" alt="Professional automotive repair shop interior" width="1600" height="1067" loading="lazy" decoding="async" />
+              <img src="/images/venues/repair.jpg?v=2" data-i18n-alt="venues.altRepair" alt="Professional automotive repair shop interior" width="1600" height="1067" loading="lazy" decoding="async" />
             </figure>
             <div class="venue-row__body">
               <span class="venue-row__index">03</span>
-              <h3>Repair shops</h3>
-              <p>Offer a useful service while customers wait. Strengthen loyalty and differentiate your shop.</p>
+              <h3 data-i18n="venues.v3h">Repair shops</h3>
+              <p data-i18n="venues.v3p">Offer a useful service while customers wait. Strengthen loyalty and differentiate your shop.</p>
             </div>
           </article>
           <article class="venue-row venue-row--right reveal" style="--delay: 0.18s">
             <figure class="venue-row__media">
-              <img src="/images/venues/mall.jpg?v=2" alt="Busy multi-level shopping mall with escalators" width="1600" height="1067" loading="lazy" decoding="async" />
+              <img src="/images/venues/mall.jpg?v=2" data-i18n-alt="venues.altMall" alt="Busy multi-level shopping mall with escalators" width="1600" height="1067" loading="lazy" decoding="async" />
             </figure>
             <div class="venue-row__body">
               <span class="venue-row__index">04</span>
-              <h3>Malls &amp; rentals</h3>
-              <p>VR cafes, karting, ice rinks &mdash; keep shared gear hygienic for every guest rotation.</p>
+              <h3 data-i18n="venues.v4h">Malls &amp; rentals</h3>
+              <p data-i18n="venues.v4p">VR cafes, karting, ice rinks &mdash; keep shared gear hygienic for every guest rotation.</p>
             </div>
           </article>
         </div>
@@ -397,64 +416,64 @@
       <section class="section section-alt" id="business">
         <div class="container">
           <header class="section-head section-head--center reveal reveal--fade">
-            <span class="section-label">Partnership models</span>
-            <h2 class="section-title">Three ways to work with us.</h2>
+            <span class="section-label" data-i18n="business.label">Partnership models</span>
+            <h2 class="section-title" data-i18n="business.title">Three ways to work with us.</h2>
           </header>
           <div class="partnership-showcase reveal">
             <article class="partnership-tier glass-card is-featured">
               <div class="partnership-tier__head">
-                <span class="partnership-tier__badge">Most popular</span>
-                <h3>Revenue share</h3>
-                <p class="partnership-tier__price"><span>25%</span> of daily revenue</p>
+                <span class="partnership-tier__badge" data-i18n="business.t1badge">Most popular</span>
+                <h3 data-i18n="business.t1h">Revenue share</h3>
+                <p class="partnership-tier__price"><span>25%</span> <span data-i18n="business.t1price">of daily revenue</span></p>
               </div>
               <ul class="partnership-tier__features">
-                <li>Free install &amp; operation</li>
-                <li>Weekly cash payouts</li>
-                <li>We handle maintenance &amp; fluid</li>
+                <li data-i18n="business.t1f1">Free install &amp; operation</li>
+                <li data-i18n="business.t1f2">Weekly cash payouts</li>
+                <li data-i18n="business.t1f3">We handle maintenance &amp; fluid</li>
               </ul>
-              <a class="btn btn-primary" href="#contact">Start partnership</a>
+              <a class="btn btn-primary" href="#contact" data-i18n="business.t1cta">Start partnership</a>
             </article>
             <article class="partnership-tier glass-card">
               <div class="partnership-tier__head">
-                <span class="partnership-tier__badge">Safest</span>
-                <h3>Space rental</h3>
-                <p class="partnership-tier__price"><span>500k&ndash;800k&#8363;</span> / month</p>
+                <span class="partnership-tier__badge" data-i18n="business.t2badge">Safest</span>
+                <h3 data-i18n="business.t2h">Space rental</h3>
+                <p class="partnership-tier__price"><span>500k&ndash;800k&#8363;</span> <span data-i18n="business.t2price">/ month</span></p>
               </div>
               <ul class="partnership-tier__features">
-                <li>Fixed monthly income</li>
-                <li>Only 1.2 m&sup2; floor space</li>
-                <li>Zero operational work</li>
+                <li data-i18n="business.t2f1">Fixed monthly income</li>
+                <li data-i18n="business.t2f2">Only 1.2 m&sup2; floor space</li>
+                <li data-i18n="business.t2f3">Zero operational work</li>
               </ul>
-              <a class="btn btn-secondary" href="#contact">Learn more</a>
+              <a class="btn btn-secondary" href="#contact" data-i18n="business.t2cta">Learn more</a>
             </article>
             <article class="partnership-tier glass-card">
               <div class="partnership-tier__head">
-                <span class="partnership-tier__badge">Highest margin</span>
-                <h3>Buy a machine</h3>
-                <p class="partnership-tier__price"><span>From 25M&#8363;</span> one-time</p>
+                <span class="partnership-tier__badge" data-i18n="business.t3badge">Highest margin</span>
+                <h3 data-i18n="business.t3h">Buy a machine</h3>
+                <p class="partnership-tier__price"><span>From 25M&#8363;</span> <span data-i18n="business.t3price">one-time</span></p>
               </div>
               <ul class="partnership-tier__features">
-                <li>Keep 100% of revenue</li>
-                <li>Lifetime technical support</li>
-                <li>Full ownership</li>
+                <li data-i18n="business.t3f1">Keep 100% of revenue</li>
+                <li data-i18n="business.t3f2">Lifetime technical support</li>
+                <li data-i18n="business.t3f3">Full ownership</li>
               </ul>
-              <a class="btn btn-secondary" href="#contact">Get a quote</a>
+              <a class="btn btn-secondary" href="#contact" data-i18n="business.t3cta">Get a quote</a>
             </article>
           </div>
 
           <div class="calc-box reveal" id="calculator">
-            <h3>Estimate your monthly share</h3>
-            <p>Revenue share at 20,000&#8363;/use &middot; 25% to partner &middot; 30 days</p>
-            <label>Uses per day: <strong data-uses-label>20</strong></label>
+            <h3 data-i18n="business.calcH">Estimate your monthly share</h3>
+            <p data-i18n="business.calcP">Revenue share at 20,000&#8363;/use &middot; 25% to partner &middot; 30 days</p>
+            <label><span data-i18n="business.calcUses">Uses per day:</span> <strong data-uses-label>20</strong></label>
             <input type="range" min="10" max="40" step="5" value="20" data-uses-range />
             <div class="calc-results">
               <div>
                 <div class="calc-big" data-calc-partner>3,000,000&#8363;</div>
-                <div class="calc-small">Your share / month</div>
+                <div class="calc-small" data-i18n="business.calcShare">Your share / month</div>
               </div>
               <div>
                 <div class="calc-big calc-big--muted" data-calc-total>12,000,000&#8363;</div>
-                <div class="calc-small">Total revenue / month</div>
+                <div class="calc-small" data-i18n="business.calcTotal">Total revenue / month</div>
               </div>
             </div>
           </div>
@@ -464,55 +483,55 @@
       <section class="section commitment-section" id="warranty">
         <div class="container">
           <header class="section-head reveal reveal--fade">
-            <span class="section-label">Commitment</span>
-            <h2 class="section-title section-title--split">Warranty you can trust.</h2>
+            <span class="section-label" data-i18n="warranty.label">Commitment</span>
+            <h2 class="section-title section-title--split" data-i18n="warranty.title">Warranty you can trust.</h2>
           </header>
           <ul class="trust-list reveal" aria-label="Warranty coverage">
             <li class="trust-list__item">
               <span class="trust-list__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
               </span>
-              <span class="trust-list__text"><strong>12 months</strong> electronics warranty</span>
+              <span class="trust-list__text" data-i18n-html="warranty.w1"><strong>12 months</strong> electronics warranty</span>
             </li>
             <li class="trust-list__item">
               <span class="trust-list__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
               </span>
-              <span class="trust-list__text"><strong>6 months</strong> mechanical parts</span>
+              <span class="trust-list__text" data-i18n-html="warranty.w2"><strong>6 months</strong> mechanical parts</span>
             </li>
             <li class="trust-list__item">
               <span class="trust-list__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0 1.172-2.872L21 3"/><path d="m3 3 7.828 7.828A4 4 0 0 0 12 13.7V22"/></svg>
               </span>
-              <span class="trust-list__text"><strong>30 days</strong> replacement guarantee</span>
+              <span class="trust-list__text" data-i18n-html="warranty.w3"><strong>30 days</strong> replacement guarantee</span>
             </li>
             <li class="trust-list__item">
               <span class="trust-list__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>
               </span>
-              <span class="trust-list__text"><strong>100% refund</strong> during partner trial</span>
+              <span class="trust-list__text" data-i18n-html="warranty.w4"><strong>100% refund</strong> during partner trial</span>
             </li>
           </ul>
           <div class="commitment-plans reveal" style="--delay: 0.06s">
-            <h3 class="commitment-plans__title">Service plans</h3>
+            <h3 class="commitment-plans__title" data-i18n="warranty.plansH">Service plans</h3>
             <ul class="trust-list trust-list--plans">
               <li class="trust-list__item">
                 <span class="trust-list__icon trust-list__icon--muted" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 </span>
-                <span class="trust-list__text"><strong>Basic</strong> &mdash; 500,000&#8363;/mo &middot; 2L fluid &middot; 24/7 phone support</span>
+                <span class="trust-list__text" data-i18n-html="warranty.p1"><strong>Basic</strong> &mdash; 500,000&#8363;/mo &middot; 2L fluid &middot; 24/7 phone support</span>
               </li>
               <li class="trust-list__item">
                 <span class="trust-list__icon trust-list__icon--muted" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 </span>
-                <span class="trust-list__text"><strong>Standard</strong> &mdash; 1,200,000&#8363;/mo &middot; 4L fluid &middot; monthly on-site visit</span>
+                <span class="trust-list__text" data-i18n-html="warranty.p2"><strong>Standard</strong> &mdash; 1,200,000&#8363;/mo &middot; 4L fluid &middot; monthly on-site visit</span>
               </li>
               <li class="trust-list__item">
                 <span class="trust-list__icon trust-list__icon--muted" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 </span>
-                <span class="trust-list__text"><strong>Premium</strong> &mdash; 2,000,000&#8363;/mo &middot; 8L fluid &middot; 24h priority response</span>
+                <span class="trust-list__text" data-i18n-html="warranty.p3"><strong>Premium</strong> &mdash; 2,000,000&#8363;/mo &middot; 8L fluid &middot; 24h priority response</span>
               </li>
             </ul>
           </div>
@@ -523,71 +542,71 @@
         <div class="container contact-faq-grid">
           <div class="faq-column reveal">
             <header class="section-head">
-              <span class="section-label">FAQ</span>
-              <h2 class="section-title">Common questions</h2>
+              <span class="section-label" data-i18n="contact.label">FAQ</span>
+              <h2 class="section-title" data-i18n="contact.title">Common questions</h2>
             </header>
             <div class="faq-accordion">
               <details open>
-                <summary>Do I need an app?</summary>
-                <p>No. Pay at the machine with cash or QR. No account needed.</p>
+                <summary data-i18n="contact.faq1q">Do I need an app?</summary>
+                <p data-i18n="contact.faq1a">No. Pay at the machine with cash or QR. No account needed.</p>
               </details>
               <details>
-                <summary>What if the machine underperforms?</summary>
-                <p>Partnership models: we remove the machine within 30 days at no cost to you.</p>
+                <summary data-i18n="contact.faq2q">What if the machine underperforms?</summary>
+                <p data-i18n="contact.faq2a">Partnership models: we remove the machine within 30 days at no cost to you.</p>
               </details>
               <details>
-                <summary>Is the fluid safe?</summary>
-                <p>Proprietary nano-silver solution &mdash; skin-safe. Official fluid required for warranty.</p>
+                <summary data-i18n="contact.faq3q">Is the fluid safe?</summary>
+                <p data-i18n="contact.faq3a">Proprietary nano-silver solution &mdash; skin-safe. Official fluid required for warranty.</p>
               </details>
               <details>
-                <summary>Do you operate outside HCMC?</summary>
-                <p>We are expanding across Vietnam. Contact us for your city.</p>
+                <summary data-i18n="contact.faq4q">Do you operate outside HCMC?</summary>
+                <p data-i18n="contact.faq4a">We are expanding across Vietnam. Contact us for your city.</p>
               </details>
             </div>
           </div>
           <div class="contact-column reveal" style="--delay: 0.08s">
-            <span class="section-label">Contact</span>
-            <h2 class="section-title">Let's talk.</h2>
-                        <p class="contact-lead">Reach us on your preferred channel. We reply within 2 hours on business days.</p>
+            <span class="section-label" data-i18n="contact.cLabel">Contact</span>
+            <h2 class="section-title" data-i18n="contact.cTitle">Let's talk.</h2>
+                        <p class="contact-lead" data-i18n="contact.cLead">Reach us on your preferred channel. We reply within 2 hours on business days.</p>
             <ul class="social-grid" aria-label="Social and contact links">
               <li>
                 <a class="social-grid__link" href="mailto:clearnanovn@gmail.com">
                   <svg class="social-grid__icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 2v.01L12 13 4 6.01V6h16ZM4 18V8.83l7.88 6.47a1 1 0 0 0 1.24 0L20 8.83V18H4Z"/></svg>
-                  <span>Email</span>
+                  <span data-i18n="contact.email">Email</span>
                 </a>
               </li>
               <li>
                 <a class="social-grid__link" href="https://wa.me/84902164414" target="_blank" rel="noopener noreferrer">
                   <svg class="social-grid__icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.435 9.884-9.881 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                  <span>WhatsApp</span>
+                  <span data-i18n="contact.whatsapp">WhatsApp</span>
                 </a>
               </li>
               <li>
                 <a class="social-grid__link" href="https://zalo.me/0902164414" target="_blank" rel="noopener noreferrer">
                   <span class="social-grid__icon social-grid__icon--zalo" aria-hidden="true"></span>
-                  <span>Zalo</span>
+                  <span data-i18n="contact.zalo">Zalo</span>
                 </a>
               </li>
               <li>
                 <a class="social-grid__link" href="https://t.me/clearnano" target="_blank" rel="noopener noreferrer">
                   <svg class="social-grid__icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-                  <span>Telegram</span>
+                  <span data-i18n="contact.telegram">Telegram</span>
                 </a>
               </li>
               <li>
                 <a class="social-grid__link" href="https://www.tiktok.com/@clearnano" target="_blank" rel="noopener noreferrer">
                   <svg class="social-grid__icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>
-                  <span>TikTok</span>
+                  <span data-i18n="contact.tiktok">TikTok</span>
                 </a>
               </li>
               <li>
                 <a class="social-grid__link" href="https://www.instagram.com/clearnano" target="_blank" rel="noopener noreferrer">
                   <svg class="social-grid__icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-                  <span>Instagram</span>
+                  <span data-i18n="contact.instagram">Instagram</span>
                 </a>
               </li>
             </ul>
-            <p class="contact-meta">0902 164 414 &middot; District 7, Ho Chi Minh City</p>
+            <p class="contact-meta" data-i18n="contact.meta">0902 164 414 &middot; District 7, Ho Chi Minh City</p>
 
           </div>
         </div>
@@ -603,41 +622,41 @@
               <span class="logo__mark"><img src="/images/optimized/logo-p0-img0.webp" alt="" /></span>
               <span>Clear Nano</span>
             </a>
-            <p>Automated helmet and gear disinfection. US technology, made in Vietnam. District 7, Ho Chi Minh City.</p>
+            <p data-i18n="footer.tagline">Automated helmet and gear disinfection. US technology, made in Vietnam. District 7, Ho Chi Minh City.</p>
           </div>
           <div class="footer-nav-grid">
             <div>
-              <h4>Product</h4>
-              <a href="#how">How it works</a>
-              <a href="#technology">Technology</a>
-              <a href="#disinfect">What we clean</a>
+              <h4 data-i18n="footer.product">Product</h4>
+              <a href="#how" data-i18n="nav.how">How it works</a>
+              <a href="#technology" data-i18n="nav.technology">Technology</a>
+              <a href="#disinfect" data-i18n="nav.disinfect">What we clean</a>
             </div>
             <div>
-              <h4>Business</h4>
-              <a href="#business">Partnerships</a>
-              <a href="#venues">Locations</a>
-              <a href="#warranty">Warranty</a>
+              <h4 data-i18n="footer.business">Business</h4>
+              <a href="#business" data-i18n="footer.partnerships">Partnerships</a>
+              <a href="#venues" data-i18n="footer.locations">Locations</a>
+              <a href="#warranty" data-i18n="warranty.label">Warranty</a>
             </div>
             <div>
-              <h4>Connect</h4>
+              <h4 data-i18n="footer.connect">Connect</h4>
               <a href="tel:+84902164414">0902 164 414</a>
-              <a href="mailto:clearnanovn@gmail.com">Email us</a>
-              <a href="#contact">Contact us</a>
+              <a href="mailto:clearnanovn@gmail.com" data-i18n="footer.emailUs">Email us</a>
+              <a href="#contact" data-i18n="footer.contactUs">Contact us</a>
             </div>
             <nav class="footer-nav-col" aria-label="Legal">
-              <h4>Legal</h4>
-              <a href="/terms.html">Terms &amp; Conditions (CGV)</a>
-              <a href="/privacy.html">Privacy Policy</a>
-              <a href="/privacy.html#cookies">Cookie Policy</a>
+              <h4 data-i18n="footer.legal">Legal</h4>
+              <a href="/terms.html" data-i18n="footer.terms">Terms &amp; Conditions (CGV)</a>
+              <a href="/privacy.html" data-i18n="footer.privacy">Privacy Policy</a>
+              <a href="/privacy.html#cookies" data-i18n="footer.cookies">Cookie Policy</a>
             </nav>
           </div>
         </div>
-        <p class="footer-company-meta">
+        <p class="footer-company-meta" data-i18n="footer.company">
           CLEAR NANO Co., Ltd &middot; MST 0318825651 &middot; District 7, Ho Chi Minh City, Vietnam
         </p>
         <div class="footer-bottom">
-          <span>&copy; 2026 Clear Nano Co., Ltd</span>
-          <span>Helmet clean in 5 minutes</span>
+          <span data-i18n="footer.copy">&copy; 2026 Clear Nano Co., Ltd</span>
+          <span data-i18n="footer.tag">Helmet clean in 5 minutes</span>
         </div>
       </div>
     </footer>
@@ -645,13 +664,17 @@
     <nav id="mobile-nav" class="mobile-nav" data-mobile-nav aria-label="Mobile" aria-hidden="true">
       <button type="button" class="mobile-nav__backdrop" data-menu-backdrop aria-label="Close menu"></button>
       <div class="mobile-nav__panel">
-        <a href="#how">How it works</a>
-        <a href="#technology">Technology</a>
-        <a href="#disinfect">What we clean</a>
-        <a href="#business">For business</a>
-        <a href="#find">Find a machine</a>
-        <a href="#partner">Become a partner</a>
-        <a href="#contact">Contact</a>
+        <div class="lang-switch lang-switch--mobile" role="group" data-i18n-aria="lang.label">
+          <button type="button" class="lang-switch__btn is-active" data-lang="en" aria-pressed="true">EN</button>
+          <button type="button" class="lang-switch__btn" data-lang="ru" aria-pressed="false">RU</button>
+        </div>
+        <a href="#how" data-i18n="nav.how">How it works</a>
+        <a href="#technology" data-i18n="nav.technology">Technology</a>
+        <a href="#disinfect" data-i18n="nav.disinfect">What we clean</a>
+        <a href="#business" data-i18n="nav.business">For business</a>
+        <a href="#find" data-i18n="nav.find">Find a machine</a>
+        <a href="#partner" data-i18n="nav.partner">Become a partner</a>
+        <a href="#contact" data-i18n="nav.contact">Contact</a>
       </div>
     </nav>
 

@@ -141,6 +141,18 @@ html.menu-open.is-inapp-scroll #main {
     margin-top: -0.5rem;
   }
 
+  .hero-video-wrap {
+    width: min(100%, 340px);
+    max-height: min(46vh, 380px);
+  }
+
+  .paths-kiosk-stage {
+    width: min(100%, 400px);
+    height: min(42vh, 360px);
+    min-height: 260px;
+    max-height: 380px;
+  }
+
   .hero-helmet-scene {
     width: min(100%, 400px);
     height: min(46vh, 320px);

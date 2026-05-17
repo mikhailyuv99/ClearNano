@@ -1,5 +1,6 @@
 import { HERO_SINGLE_MODEL } from "./hero-config.js";
 import { isMobilePerfMode } from "./device.js";
+import { getLang, t } from "./i18n.js";
 
 /** Milliseconds each hero product stays on screen before the next transition */
 export const HERO_ROTATE_MS = 2500;
@@ -16,8 +17,7 @@ export function initHeroRotator(api, products) {
   const wrap = document.querySelector(".hero-word-wrap");
   const layerA = document.querySelector("[data-hero-word-a]");
   const layerB = document.querySelector("[data-hero-word-b]");
-  const canvas = document.getElementById("hero-helmet-canvas");
-  const viewer = document.getElementById("hero-helmet-viewer");
+  const canvas = document.getElementById("paths-kiosk-canvas");
 
   if (!wrap || !layerA || !layerB || !products?.length) return;
 
@@ -33,10 +33,17 @@ export function initHeroRotator(api, products) {
     return frontIsA ? layerB : layerA;
   }
 
+  function wordFor(product) {
+    return t(product.wordKey ?? `words.${product.slug}`);
+  }
+
   function setCanvasLabel(word) {
-    const label = `Clear Nano cleaning machine — ${word}`;
-    if (canvas) canvas.setAttribute("aria-label", label);
-    if (viewer) viewer.setAttribute("alt", label);
+    if (canvas) {
+      canvas.setAttribute(
+        "aria-label",
+        getLang() === "ru" ? `${t("paths.kioskLabel")} — ${word}` : `Clear Nano cleaning machine — ${word}`
+      );
+    }
   }
 
   function clearWordTimer() {
@@ -99,16 +106,24 @@ export function initHeroRotator(api, products) {
     }, fadeMs + 60);
   }
 
-  setWord(products[0].word);
-  setCanvasLabel(products[0].word);
+  const list = products;
+  let index = 0;
+
+  const refreshWords = () => {
+    const w = wordFor(list[index] ?? list[0]);
+    setWord(w);
+    setCanvasLabel(w);
+  };
+
+  setWord(wordFor(list[0]));
+  setCanvasLabel(wordFor(list[0]));
+
+  window.addEventListener("cn-lang-change", refreshWords);
 
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     stopRotation = null;
     return;
   }
-
-  const list = products;
-  let index = 0;
 
   async function ensureGpuReady() {
     if (!api.isHealthy || api.isHealthy()) return true;
@@ -127,7 +142,7 @@ export function initHeroRotator(api, products) {
     const product = list[index];
 
     if (HERO_SINGLE_MODEL) {
-      crossfadeWord(product.word);
+      crossfadeWord(wordFor(product));
       return;
     }
 
@@ -137,7 +152,7 @@ export function initHeroRotator(api, products) {
       try {
         await api.showProduct(item.slug, {
           onWordReveal() {
-            crossfadeWord(item.word);
+            crossfadeWord(wordFor(item));
           },
         });
         return;
