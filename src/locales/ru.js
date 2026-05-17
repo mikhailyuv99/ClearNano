@@ -47,12 +47,12 @@ export default {
     "riding-gloves": "мотоперчатки",
     "sports-shoes": "обувь",
     "knee-guards": "наколенники",
-    "vr-headset": "гарнитура",
+    "vr-headset": "VR-шлем",
     masks: "маска",
     "ice-skates": "коньки",
     "hard-hat": "каска",
     "bicycle-helmet": "велошлем",
-    "gym-equipment": "инвентарь",
+    "gym-equipment": "экипировка",
   },
   marquee: {
     main: [
@@ -72,7 +72,7 @@ export default {
       "Наколенники и налокотники",
       "Мотоперчатки",
       "Велосипедные шлемы",
-      "VR-гарнитуры",
+      "VR-шлемы",
       "Маски и защита лица",
       "Коньки",
       "Спортивный инвентарь",

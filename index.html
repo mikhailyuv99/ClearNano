@@ -22,7 +22,7 @@
     />
     <link rel="icon" type="image/png" href="/images/optimized/logo-p0-img0.webp" />
     <link rel="modulepreload" href="/src/hero-boot.js" />
-    <link rel="stylesheet" href="/src/styles.css?v=menu-fix-2" />
+    <link rel="stylesheet" href="/src/styles.css?v=hero-mobile-fix" />
     <script>
       (function () {
         var ua = navigator.userAgent || "";
@@ -34,8 +34,9 @@
         ) {
           var r = document.documentElement;
           r.classList.add("is-inapp-browser", "is-inapp-scroll");
-          var h = Math.round(window.innerHeight);
-          var w = Math.round(window.innerWidth);
+          var vv = window.visualViewport;
+          var h = Math.round(vv && vv.height ? vv.height : window.innerHeight);
+          var w = Math.round(vv && vv.width ? vv.width : window.innerWidth);
           r.style.setProperty("--app-height", h + "px");
           r.style.setProperty("--app-width", w + "px");
           var vp = document.querySelector('meta[name="viewport"]');
@@ -66,10 +67,47 @@
         border-radius: 0 !important;
         transform: none !important;
       }
-      html.is-inapp-scroll .page-bg-stack {
+      html.is-inapp-scroll,
+      html.is-inapp-scroll body {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
         width: var(--app-width, 100%) !important;
         height: var(--app-height, 100%) !important;
+        overflow: hidden !important;
+        overscroll-behavior: none !important;
+      }
+      html.is-inapp-scroll .page-bg-stack {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: var(--app-width, 100%) !important;
+        height: var(--app-height, 100%) !important;
+        min-width: var(--app-width, 100%) !important;
+        min-height: var(--app-height, 100%) !important;
+        max-width: var(--app-width, 100%) !important;
+        max-height: var(--app-height, 100%) !important;
+        margin: 0 !important;
         transform: none !important;
+        -webkit-transform: none !important;
+      }
+      html.is-inapp-scroll .page-bg img {
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        transform: none !important;
+        -webkit-transform: none !important;
+      }
+      html.is-inapp-scroll #main {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: var(--app-width, 100%) !important;
+        height: var(--app-height, 100%) !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
       }
     </style>
   </head>
@@ -96,8 +134,7 @@
             <span class="logo__mark"><img src="/images/optimized/logo-p0-img0.webp" alt="" /></span>
             <span>Clear Nano</span>
           </a>
-          <div class="header-end">
-            <nav class="nav" aria-label="Primary">
+          <nav class="nav" aria-label="Primary">
               <a href="#how" data-i18n="nav.how">How it works</a>
               <a href="#technology" data-i18n="nav.technology">Technology</a>
               <a href="#disinfect" data-i18n="nav.disinfect">What we clean</a>
@@ -113,10 +150,9 @@
                 <span class="lang-switch__code">RU</span>
               </button>
             </div>
-            <div class="header-cta">
-              <a class="btn btn-ghost header-cta__btn" href="#find" data-i18n="nav.find">Find a machine</a>
-              <a class="btn btn-primary header-cta__btn" href="#partner" data-i18n="nav.partner">Become a partner</a>
-            </div>
+          <div class="header-cta">
+            <a class="btn btn-ghost" href="#find" data-i18n="nav.find">Find a machine</a>
+            <a class="btn btn-primary" href="#partner" data-i18n="nav.partner">Become a partner</a>
           </div>
           <button
             class="menu-toggle"
@@ -141,7 +177,7 @@
           <div class="hero-copy reveal reveal--instant">
             <div class="hero-copy__head">
             <h1 id="hero-title">
-              <span data-hero-prefix>Your </span><span class="hero-word-wrap" aria-live="polite"><span class="hero-word-slot"><span class="hero-word-layer is-visible" data-hero-word-a>helmet</span><span class="hero-word-layer" data-hero-word-b aria-hidden="true"></span></span></span><br />
+              <span class="hero-headline-row"><span data-hero-prefix>Your </span><span class="hero-word-wrap" aria-live="polite"><span class="hero-word-slot"><span class="hero-word-layer is-visible" data-hero-word-a>helmet</span><span class="hero-word-layer" data-hero-word-b aria-hidden="true"></span></span></span></span><br />
               <span class="gradient-text" data-hero-tagline>Clean in 5 minutes.</span>
             </h1>
             <p class="hero-lead" data-i18n="hero.lead">
@@ -671,16 +707,7 @@
     <nav id="mobile-nav" class="mobile-nav" data-mobile-nav aria-label="Mobile" aria-hidden="true">
       <button type="button" class="mobile-nav__backdrop" data-menu-backdrop aria-label="Close menu"></button>
       <div class="mobile-nav__panel">
-        <div class="lang-switch lang-switch--mobile" role="group" data-i18n-aria="lang.label" data-active-lang="en">
-          <span class="lang-switch__thumb" aria-hidden="true"></span>
-          <button type="button" class="lang-switch__btn is-active" data-lang="en" aria-pressed="true">
-            <span class="lang-switch__code">EN</span>
-          </button>
-          <button type="button" class="lang-switch__btn" data-lang="ru" aria-pressed="false">
-            <span class="lang-switch__code">RU</span>
-          </button>
-        </div>
-        <a href="#how" data-i18n="navMenu.how">How it works</a>
+<a href="#how" data-i18n="navMenu.how">How it works</a>
         <a href="#technology" data-i18n="navMenu.technology">Technology</a>
         <a href="#disinfect" data-i18n="navMenu.disinfect">What we clean</a>
         <a href="#business" data-i18n="navMenu.business">For business</a>

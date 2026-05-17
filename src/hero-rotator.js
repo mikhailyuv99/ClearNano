@@ -1,13 +1,13 @@
 import { HERO_SINGLE_MODEL } from "./hero-config.js";
 import { isMobilePerfMode } from "./device.js";
 import { getLang, t } from "./i18n.js";
-import { applyHeroHeadline, getHeroHeadline } from "./hero-grammar.js";
+import { applyHeroHeadline, getHeroHeadline, syncHeroHeadlineLayout } from "./hero-grammar.js";
 
 /** Milliseconds each hero product stays on screen before the next transition */
 export const HERO_ROTATE_MS = 2500;
 
 function wordFadeMs() {
-  return isMobilePerfMode() ? 400 : 520;
+  return isMobilePerfMode() ? 320 : 380;
 }
 
 let stopRotation = null;
@@ -25,6 +25,8 @@ export function initHeroRotator(api, products) {
   let frontIsA = true;
   let cancelled = false;
   let wordTimer = null;
+  let hasShownFirst = false;
+  let isCrossfading = false;
 
   function getFront() {
     return frontIsA ? layerA : layerB;
@@ -50,81 +52,130 @@ export function initHeroRotator(api, products) {
     }
   }
 
+  function resetLayers() {
+    wrap.querySelectorAll(".hero-word-layer").forEach((el) => {
+      el.classList.remove("is-entering", "is-exiting");
+    });
+  }
+
   function setWord(word) {
+    const text = String(word ?? "").trim();
+    if (!text) return;
+
     const front = getFront();
-    front.textContent = word;
+    front.textContent = text;
     front.classList.add("is-visible");
     front.removeAttribute("aria-hidden");
 
     const back = getBack();
     back.textContent = "";
-    back.classList.remove("is-visible");
+    back.classList.remove("is-visible", "is-entering", "is-exiting");
     back.setAttribute("aria-hidden", "true");
   }
 
-  function showHeadline(product, { animate = false } = {}) {
-    const word = applyHeroHeadline(product);
-    setCanvasLabel(product);
-    if (animate) {
-      crossfadeWord(word);
-    } else {
-      setWord(word);
-    }
+  function crossfadeWord(word) {
+    return new Promise((resolve) => {
+      const text = String(word ?? "").trim();
+      if (!text) {
+        resolve();
+        return;
+      }
+
+      const fadeMs = wordFadeMs();
+      const out = getFront();
+      const inn = getBack();
+
+      resetLayers();
+
+      inn.textContent = text;
+      inn.removeAttribute("aria-hidden");
+      out.setAttribute("aria-hidden", "true");
+      inn.classList.add("is-visible", "is-entering");
+
+      void inn.offsetWidth;
+
+      inn.classList.remove("is-entering");
+      out.classList.add("is-exiting");
+
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        clearWordTimer();
+
+        out.classList.remove("is-visible", "is-exiting");
+        out.textContent = "";
+        out.setAttribute("aria-hidden", "true");
+        inn.classList.remove("is-entering");
+        inn.classList.add("is-visible");
+        inn.textContent = text;
+        inn.removeAttribute("aria-hidden");
+        frontIsA = !frontIsA;
+        resolve();
+      };
+
+      const onEnd = (e) => {
+        if (e.target !== inn || e.propertyName !== "opacity") return;
+        inn.removeEventListener("transitionend", onEnd);
+        finish();
+      };
+
+      inn.addEventListener("transitionend", onEnd);
+      wordTimer = window.setTimeout(() => {
+        inn.removeEventListener("transitionend", onEnd);
+        finish();
+      }, fadeMs + 50);
+    });
   }
 
-  function crossfadeWord(word) {
+  async function showHeadline(product, { animate = false } = {}) {
+    const shouldAnimate = animate && hasShownFirst;
+
+    if (shouldAnimate && isCrossfading) {
+      return;
+    }
+
     clearWordTimer();
-    const fadeMs = wordFadeMs();
 
-    const out = getFront();
-    const inn = getBack();
+    const word = applyHeroHeadline(product, { skipWord: shouldAnimate });
+    setCanvasLabel(product);
 
-    inn.textContent = word;
-    inn.removeAttribute("aria-hidden");
-    out.setAttribute("aria-hidden", "true");
+    if (!word) return;
 
-    inn.classList.add("is-visible", "is-entering");
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        inn.classList.remove("is-entering");
-        out.classList.add("is-exiting");
-      });
-    });
-
-    const finish = () => {
-      out.classList.remove("is-visible", "is-exiting");
-      out.textContent = "";
-      inn.classList.remove("is-entering");
-      frontIsA = !frontIsA;
-      wordTimer = null;
-    };
-
-    const onEnd = (e) => {
-      if (e.target !== inn || e.propertyName !== "opacity") return;
-      inn.removeEventListener("transitionend", onEnd);
-      finish();
-    };
-    inn.addEventListener("transitionend", onEnd);
-    wordTimer = window.setTimeout(() => {
-      inn.removeEventListener("transitionend", onEnd);
-      finish();
-    }, fadeMs + 60);
+    if (shouldAnimate) {
+      isCrossfading = true;
+      try {
+        await crossfadeWord(word);
+      } finally {
+        isCrossfading = false;
+      }
+    } else {
+      resetLayers();
+      setWord(word);
+      hasShownFirst = true;
+    }
   }
 
   const list = products;
   let index = 0;
 
-  const refreshHeadline = () => {
-    showHeadline(list[index] ?? list[0]);
+  const refreshHeadline = async () => {
+    syncHeroHeadlineLayout(list);
+    await showHeadline(list[index] ?? list[0], { animate: hasShownFirst });
   };
 
-  showHeadline(list[0]);
-  window.addEventListener("cn-lang-change", refreshHeadline);
+  syncHeroHeadlineLayout(list);
+  void showHeadline(list[0], { animate: false });
+  window.addEventListener("cn-lang-change", () => {
+    void refreshHeadline();
+  });
 
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    stopRotation = null;
-    return;
+    stopRotation = () => {
+      cancelled = true;
+      clearWordTimer();
+    };
+    return stopRotation;
   }
 
   async function ensureGpuReady() {
@@ -144,7 +195,7 @@ export function initHeroRotator(api, products) {
     const product = list[index];
 
     if (HERO_SINGLE_MODEL) {
-      showHeadline(product, { animate: true });
+      await showHeadline(product, { animate: true });
       return;
     }
 
@@ -154,7 +205,7 @@ export function initHeroRotator(api, products) {
       try {
         await api.showProduct(item.slug, {
           onWordReveal() {
-            showHeadline(item, { animate: true });
+            void showHeadline(item, { animate: true });
           },
         });
         return;
@@ -178,10 +229,9 @@ export function initHeroRotator(api, products) {
 
   stopRotation = () => {
     cancelled = true;
+    isCrossfading = false;
     clearWordTimer();
-    wrap.querySelectorAll(".hero-word-layer").forEach((el) => {
-      el.classList.remove("is-entering", "is-exiting");
-    });
+    resetLayers();
   };
   return stopRotation;
 }

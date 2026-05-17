@@ -2,10 +2,15 @@ import { initHeroRotator } from "./hero-rotator.js";
 import { HERO_ROTATION } from "./hero-products.js";
 import { heroSceneModule } from "./hero-boot.js";
 import { initHeroVideo } from "./hero-video.js";
+import { syncHeroHeadlineLayout } from "./hero-grammar.js";
 import { t } from "./i18n.js";
 
 export async function initHeroExperience() {
   initHeroVideo();
+  syncHeroHeadlineLayout(HERO_ROTATION);
+  document.fonts?.ready
+    ?.then(() => syncHeroHeadlineLayout(HERO_ROTATION))
+    .catch(() => {});
 
   const kioskStage = document.getElementById("paths-kiosk-stage");
   const kioskCanvas = document.getElementById("paths-kiosk-canvas");

@@ -6,45 +6,49 @@ function applyLockedViewport(root, w, h) {
 }
 
 function measureViewport() {
+  const vv = window.visualViewport;
   return {
-    w: Math.round(window.visualViewport?.width ?? window.innerWidth),
-    h: Math.round(window.visualViewport?.height ?? window.innerHeight),
+    w: Math.round(vv?.width ?? window.innerWidth),
+    h: Math.round(vv?.height ?? window.innerHeight),
   };
 }
 
-/** In-app WebViews: scroll #main + viewport dimensions frozen (no resize-on-scroll zoom). */
+function hasInlineLock(root) {
+  const h = root.style.getPropertyValue("--app-height");
+  return h && h !== "100%" && parseFloat(h) > 0;
+}
+
+/**
+ * In-app WebViews: scroll #main, freeze viewport size once (no resize-on-scroll jump).
+ */
 export function initPageBgPin() {
   if (!isInAppBrowser()) return;
 
   const root = document.documentElement;
   root.classList.add("is-inapp-browser", "is-inapp-scroll");
 
-  const finalizeLock = () => {
-    const lock = measureViewport();
-    applyLockedViewport(root, lock.w, lock.h);
-    sessionStorage.setItem("cn-viewport-lock", JSON.stringify(lock));
+  let locked = hasInlineLock(root);
+
+  const lockOnce = () => {
+    if (locked) return;
+    const { w, h } = measureViewport();
+    if (w < 1 || h < 1) return;
+    applyLockedViewport(root, w, h);
+    locked = true;
   };
 
-  try {
-    const stored = sessionStorage.getItem("cn-viewport-lock");
-    if (stored) {
-      const { w, h } = JSON.parse(stored);
-      if (w > 0 && h > 0) {
-        applyLockedViewport(root, w, h);
-      } else {
-        finalizeLock();
-      }
-    } else {
-      finalizeLock();
-    }
-  } catch {
-    finalizeLock();
+  if (!locked) {
+    lockOnce();
   }
 
-  requestAnimationFrame(finalizeLock);
-
   window.addEventListener("orientationchange", () => {
-    sessionStorage.removeItem("cn-viewport-lock");
-    setTimeout(finalizeLock, 600);
+    locked = false;
+    window.setTimeout(() => {
+      const { w, h } = measureViewport();
+      if (w > 0 && h > 0) {
+        applyLockedViewport(root, w, h);
+        locked = true;
+      }
+    }, 650);
   });
 }
