@@ -17,7 +17,7 @@ export default {
     partner: "Become a partner",
   },
   hero: {
-    titlePrefix: "Your",
+    titlePrefix: "Your ",
     titleGradient: "Clean in 5 minutes.",
     lead:
       "Automated cabinets that disinfect helmets, sports gear, and everyday items with UV, nano-silver fog, and ozone — then dry them completely. No app. No sweat smell.",

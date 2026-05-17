@@ -35,6 +35,12 @@ export function setLang(lang) {
 }
 
 function applyText(el, value) {
+  if (el.hasAttribute("data-hero-prefix")) {
+    const empty = value == null || value === "";
+    el.hidden = empty;
+    el.style.display = empty ? "none" : "";
+    if (empty) return;
+  }
   if (value == null || value === "") return;
   el.textContent = value;
 }

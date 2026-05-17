@@ -129,10 +129,13 @@ html.menu-open.is-inapp-scroll #main {
 
   .hero-visual {
     order: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     min-height: 0 !important;
     padding: 0 !important;
-    margin: 0 0 -0.75rem;
+    margin: 0 auto -0.75rem;
   }
 
   .hero-copy__foot {
@@ -142,8 +145,9 @@ html.menu-open.is-inapp-scroll #main {
   }
 
   .hero-video-wrap {
-    width: min(100%, 340px);
+    width: min(92vw, 300px);
     max-height: min(46vh, 380px);
+    margin-inline: auto;
   }
 
   .paths-kiosk-stage {
