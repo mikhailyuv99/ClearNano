@@ -199,6 +199,26 @@ html.menu-open.is-inapp-scroll #main {
   }
 }
 
+/* Russian desktop header — keep one line until wide layouts */
+@media (min-width: 1024px) and (max-width: 1180px) {
+  html[lang="ru"] .header-end {
+    gap: 0.4rem;
+  }
+
+  html[lang="ru"] .nav {
+    gap: 0.55rem;
+  }
+
+  html[lang="ru"] .logo {
+    font-size: 1.05rem;
+  }
+
+  html[lang="ru"] .logo__mark {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
 /* Header + menu */
 @media (max-width: 1023px) {
   :root {

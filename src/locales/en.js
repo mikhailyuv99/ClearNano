@@ -16,6 +16,15 @@ export default {
     find: "Find a machine",
     partner: "Become a partner",
   },
+  navMenu: {
+    how: "How it works",
+    technology: "Technology",
+    disinfect: "What we clean",
+    business: "For business",
+    contact: "Contact",
+    find: "Find a machine",
+    partner: "Become a partner",
+  },
   hero: {
     titlePrefix: "Your ",
     titleGradient: "Clean in 5 minutes.",
