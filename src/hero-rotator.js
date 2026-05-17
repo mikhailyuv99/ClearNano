@@ -1,6 +1,7 @@
 import { HERO_SINGLE_MODEL } from "./hero-config.js";
 import { isMobilePerfMode } from "./device.js";
 import { getLang, t } from "./i18n.js";
+import { applyHeroHeadline, getHeroHeadline } from "./hero-grammar.js";
 
 /** Milliseconds each hero product stays on screen before the next transition */
 export const HERO_ROTATE_MS = 2500;
@@ -33,17 +34,13 @@ export function initHeroRotator(api, products) {
     return frontIsA ? layerB : layerA;
   }
 
-  function wordFor(product) {
-    return t(product.wordKey ?? `words.${product.slug}`);
-  }
-
-  function setCanvasLabel(word) {
-    if (canvas) {
-      canvas.setAttribute(
-        "aria-label",
-        getLang() === "ru" ? `${t("paths.kioskLabel")} — ${word}` : `Clear Nano cleaning machine — ${word}`
-      );
-    }
+  function setCanvasLabel(product) {
+    if (!canvas) return;
+    const { full, word } = getHeroHeadline(product);
+    canvas.setAttribute(
+      "aria-label",
+      getLang() === "ru" ? `${t("paths.kioskLabel")} — ${full}` : `Clear Nano cleaning machine — ${word}`
+    );
   }
 
   function clearWordTimer() {
@@ -63,6 +60,16 @@ export function initHeroRotator(api, products) {
     back.textContent = "";
     back.classList.remove("is-visible");
     back.setAttribute("aria-hidden", "true");
+  }
+
+  function showHeadline(product, { animate = false } = {}) {
+    const word = applyHeroHeadline(product);
+    setCanvasLabel(product);
+    if (animate) {
+      crossfadeWord(word);
+    } else {
+      setWord(word);
+    }
   }
 
   function crossfadeWord(word) {
@@ -90,7 +97,6 @@ export function initHeroRotator(api, products) {
       out.textContent = "";
       inn.classList.remove("is-entering");
       frontIsA = !frontIsA;
-      setCanvasLabel(word);
       wordTimer = null;
     };
 
@@ -109,16 +115,12 @@ export function initHeroRotator(api, products) {
   const list = products;
   let index = 0;
 
-  const refreshWords = () => {
-    const w = wordFor(list[index] ?? list[0]);
-    setWord(w);
-    setCanvasLabel(w);
+  const refreshHeadline = () => {
+    showHeadline(list[index] ?? list[0]);
   };
 
-  setWord(wordFor(list[0]));
-  setCanvasLabel(wordFor(list[0]));
-
-  window.addEventListener("cn-lang-change", refreshWords);
+  showHeadline(list[0]);
+  window.addEventListener("cn-lang-change", refreshHeadline);
 
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     stopRotation = null;
@@ -126,7 +128,7 @@ export function initHeroRotator(api, products) {
   }
 
   async function ensureGpuReady() {
-    if (!api.isHealthy || api.isHealthy()) return true;
+    if (!api?.isHealthy || api.isHealthy()) return true;
     try {
       await api.waitForHealthy?.();
       return api.isHealthy?.() ?? true;
@@ -142,7 +144,7 @@ export function initHeroRotator(api, products) {
     const product = list[index];
 
     if (HERO_SINGLE_MODEL) {
-      crossfadeWord(wordFor(product));
+      showHeadline(product, { animate: true });
       return;
     }
 
@@ -152,7 +154,7 @@ export function initHeroRotator(api, products) {
       try {
         await api.showProduct(item.slug, {
           onWordReveal() {
-            crossfadeWord(wordFor(item));
+            showHeadline(item, { animate: true });
           },
         });
         return;

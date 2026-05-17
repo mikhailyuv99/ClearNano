@@ -103,9 +103,14 @@
             <a href="#business" data-i18n="nav.business">For business</a>
             <a href="#contact" data-i18n="nav.contact">Contact</a>
           </nav>
-          <div class="lang-switch" role="group" data-i18n-aria="lang.label">
-            <button type="button" class="lang-switch__btn is-active" data-lang="en" aria-pressed="true">EN</button>
-            <button type="button" class="lang-switch__btn" data-lang="ru" aria-pressed="false">RU</button>
+          <div class="lang-switch" role="group" data-i18n-aria="lang.label" data-active-lang="en">
+            <span class="lang-switch__thumb" aria-hidden="true"></span>
+            <button type="button" class="lang-switch__btn is-active" data-lang="en" aria-pressed="true">
+              <span class="lang-switch__code">EN</span>
+            </button>
+            <button type="button" class="lang-switch__btn" data-lang="ru" aria-pressed="false">
+              <span class="lang-switch__code">RU</span>
+            </button>
           </div>
           <div class="header-cta">
             <a class="btn btn-ghost" href="#find" data-i18n="nav.find">Find a machine</a>
@@ -134,8 +139,8 @@
           <div class="hero-copy reveal reveal--instant">
             <div class="hero-copy__head">
             <h1 id="hero-title">
-              <span data-i18n="hero.titlePrefix" data-hero-prefix>Your </span><span class="hero-word-wrap" aria-live="polite"><span class="hero-word-slot"><span class="hero-word-layer is-visible" data-hero-word-a>helmet</span><span class="hero-word-layer" data-hero-word-b aria-hidden="true"></span></span></span><br />
-              <span class="gradient-text" data-i18n="hero.titleGradient">Clean in 5 minutes.</span>
+              <span data-hero-prefix>Your </span><span class="hero-word-wrap" aria-live="polite"><span class="hero-word-slot"><span class="hero-word-layer is-visible" data-hero-word-a>helmet</span><span class="hero-word-layer" data-hero-word-b aria-hidden="true"></span></span></span><br />
+              <span class="gradient-text" data-hero-tagline>Clean in 5 minutes.</span>
             </h1>
             <p class="hero-lead" data-i18n="hero.lead">
               Automated cabinets that disinfect helmets, sports gear, and everyday items with
@@ -664,9 +669,14 @@
     <nav id="mobile-nav" class="mobile-nav" data-mobile-nav aria-label="Mobile" aria-hidden="true">
       <button type="button" class="mobile-nav__backdrop" data-menu-backdrop aria-label="Close menu"></button>
       <div class="mobile-nav__panel">
-        <div class="lang-switch lang-switch--mobile" role="group" data-i18n-aria="lang.label">
-          <button type="button" class="lang-switch__btn is-active" data-lang="en" aria-pressed="true">EN</button>
-          <button type="button" class="lang-switch__btn" data-lang="ru" aria-pressed="false">RU</button>
+        <div class="lang-switch lang-switch--mobile" role="group" data-i18n-aria="lang.label" data-active-lang="en">
+          <span class="lang-switch__thumb" aria-hidden="true"></span>
+          <button type="button" class="lang-switch__btn is-active" data-lang="en" aria-pressed="true">
+            <span class="lang-switch__code">EN</span>
+          </button>
+          <button type="button" class="lang-switch__btn" data-lang="ru" aria-pressed="false">
+            <span class="lang-switch__code">RU</span>
+          </button>
         </div>
         <a href="#how" data-i18n="nav.how">How it works</a>
         <a href="#technology" data-i18n="nav.technology">Technology</a>

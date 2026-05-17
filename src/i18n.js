@@ -35,12 +35,6 @@ export function setLang(lang) {
 }
 
 function applyText(el, value) {
-  if (el.hasAttribute("data-hero-prefix")) {
-    const empty = value == null || value === "";
-    el.hidden = empty;
-    el.style.display = empty ? "none" : "";
-    if (empty) return;
-  }
   if (value == null || value === "") return;
   el.textContent = value;
 }
@@ -89,6 +83,10 @@ export function applyLocale(lang = current) {
     const items = get(pack, key);
     const track = el.querySelector(".marquee-track");
     if (track && Array.isArray(items)) fillMarquee(track, items);
+  });
+
+  document.querySelectorAll(".lang-switch").forEach((sw) => {
+    sw.dataset.activeLang = current;
   });
 
   document.querySelectorAll(".lang-switch__btn").forEach((btn) => {
