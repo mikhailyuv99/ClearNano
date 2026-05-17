@@ -1,25 +1,30 @@
 import { isInAppBrowser } from "./device.js";
 
-function applyLockedViewport(root, w, h) {
+function applyShellLock(root, w, h) {
   root.style.setProperty("--app-width", `${w}px`);
   root.style.setProperty("--app-height", `${h}px`);
 }
 
-function measureViewport() {
+function pinBgToVisualViewport() {
+  const stack = document.querySelector(".page-bg-stack");
+  const root = document.documentElement;
   const vv = window.visualViewport;
-  return {
-    w: Math.round(vv?.width ?? window.innerWidth),
-    h: Math.round(vv?.height ?? window.innerHeight),
-  };
-}
+  if (!stack || !vv) return;
 
-function hasInlineLock(root) {
-  const h = root.style.getPropertyValue("--app-height");
-  return h && h !== "100%" && parseFloat(h) > 0;
+  const x = Math.round(vv.offsetLeft);
+  const y = Math.round(vv.offsetTop);
+  const w = Math.round(vv.width);
+  const h = Math.round(vv.height);
+
+  root.style.setProperty("--vv-x", `${x}px`);
+  root.style.setProperty("--vv-y", `${y}px`);
+  root.style.setProperty("--vv-w", `${w}px`);
+  root.style.setProperty("--vv-h", `${h}px`);
 }
 
 /**
- * In-app WebViews: scroll #main, freeze viewport size once (no resize-on-scroll jump).
+ * In-app WebViews (Instagram, TikTok, etc.): scroll inside #main and pin the
+ * fixed background to the visual viewport so it does not drift on scroll.
  */
 export function initPageBgPin() {
   if (!isInAppBrowser()) return;
@@ -27,28 +32,49 @@ export function initPageBgPin() {
   const root = document.documentElement;
   root.classList.add("is-inapp-browser", "is-inapp-scroll");
 
-  let locked = hasInlineLock(root);
+  let shellW = Math.round(window.innerWidth);
+  let shellH = Math.round(window.innerHeight);
 
-  const lockOnce = () => {
-    if (locked) return;
-    const { w, h } = measureViewport();
-    if (w < 1 || h < 1) return;
-    applyLockedViewport(root, w, h);
-    locked = true;
-  };
-
-  if (!locked) {
-    lockOnce();
+  if (!root.style.getPropertyValue("--app-height")) {
+    applyShellLock(root, shellW, shellH);
+  } else {
+    shellW = Math.round(parseFloat(root.style.getPropertyValue("--app-width")) || shellW);
+    shellH = Math.round(parseFloat(root.style.getPropertyValue("--app-height")) || shellH);
   }
 
+  let frame = 0;
+  const schedulePin = () => {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      pinBgToVisualViewport();
+    });
+  };
+
+  pinBgToVisualViewport();
+
+  window.visualViewport?.addEventListener("scroll", schedulePin);
+  window.visualViewport?.addEventListener("resize", schedulePin);
+  window.addEventListener("scroll", schedulePin, { passive: true });
+  window.addEventListener("resize", schedulePin, { passive: true });
+
+  const main = document.getElementById("main");
+  main?.addEventListener("scroll", schedulePin, { passive: true });
+
   window.addEventListener("orientationchange", () => {
-    locked = false;
     window.setTimeout(() => {
-      const { w, h } = measureViewport();
-      if (w > 0 && h > 0) {
-        applyLockedViewport(root, w, h);
-        locked = true;
-      }
+      shellW = Math.round(window.innerWidth);
+      shellH = Math.round(window.innerHeight);
+      applyShellLock(root, shellW, shellH);
+      schedulePin();
     }, 650);
   });
+}
+
+/** For the inline head script — earliest possible pin */
+export function pinBgEarly() {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  if (!root.classList.contains("is-inapp-scroll")) return;
+  pinBgToVisualViewport();
 }
